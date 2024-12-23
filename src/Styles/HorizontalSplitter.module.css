@@ -1,0 +1,75 @@
+
+
+  
+  
+  .splitter {
+    height: 5px;
+    cursor: row-resize;
+    background-color: #333; /* Adjust color if necessary */
+    z-index: 1;
+  }
+  .buttonContainer {
+    display: flex;
+    justify-content: space-between; /* Space between left and right buttons */
+    padding: 10px;
+    background-color: #ffffff; /* Optional: background color */
+    border-top: 1px solid #ddd; /* Optional: border for separation */
+    gap: 12px; /* Space between buttons */
+  }
+  
+  .button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s, transform 0.3s; /* Smooth transition for hover effects */
+  }
+  
+  .challengeButton {
+    background-color: green; /* Green for "Done with the Challenge" */
+    color: white;
+  }
+  
+  .helpButton {
+    background-color: rgb(189, 10, 10); /* Red for "Need Help" */
+    color: white;
+  }
+  
+  .beginButton {
+    background-color: green; /* Green for "Let's Begin" */
+    color: white;
+  }
+  
+  .button:hover {
+    transform: scale(1.05); /* Slightly enlarge button on hover */
+  }
+  
+  .challengeButton:hover {
+    background-color: darkgreen; /* Darker green on hover */
+  }
+  
+  .helpButton:hover {
+    background-color: darkred; /* Darker red on hover */
+  }
+  
+  .beginButton:hover {
+    background-color: darkgreen; /* Darker green on hover */
+  }
+  .bookCallButton {
+    background-color:rgb(167, 201, 151); /* Blue background */
+    color: rgb(8, 6, 6);
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    left: 0%;
+    transition: background-color 0.3s, transform 0.3s; 
+    z-index: 0;/* Smooth transition for hover effects */
+  }
+  
+  .bookCallButton:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: scale(1.05); /* Slightly enlarge button on hover */
+  }
