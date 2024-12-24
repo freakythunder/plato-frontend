@@ -1,24 +1,4 @@
 /* Scrollbar styling */
-.messagesContainer::-webkit-scrollbar {
-  width: 6px;
-}
-
-.messagesContainer::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-.messagesContainer::-webkit-scrollbar-thumb {
-  background-color: #888;
-  border-radius: 10px;
-}
-
-.messagesContainer::-webkit-scrollbar-thumb:hover {
-  background-color: #555;
-}
-
-/* src/Styles/ChatInterface.module.css */
-
 .chatContainer {
   display: flex;
   flex-direction: column;
@@ -29,7 +9,7 @@
   position: relative;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  font-family: 'Sometype Mono', monospace;
+  font-family: 'Sometype Mono', monospace; 
 }
 
 .messagesContainer {
@@ -50,24 +30,26 @@
   gap: 8px;
 }
 
-.userMessage {
+.userMessage{
   padding: 8px 12px;
   border-radius: 18px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(0,  0, 0, 0.1);
+  background-color: rgb(198 219 188);
+}
+.aiMessage {
+  padding: 8px 12px;
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(0,  0, 0, 0.1);
+}
+.userMessage, 
+.aiMessage {
+  font-family: 'Sometype Mono', monospace; /* Ensure messages use the new font */
+}
+
+.userMessage {
   background-color: rgb(198 219 188);
   color: rgb(0, 0, 0);
   align-self: flex-end;
-}
-
-.aiMessage {
-  padding: 8px 12px;
-  border-radius: 18px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.userMessage,
-.aiMessage {
-  font-family: 'Sometype Mono', monospace; /* Ensure messages use the new font */
 }
 
 .timestamp {
@@ -81,39 +63,177 @@
   text-align: center;
   margin: 8px 0;
 }
+/* src/Styles/ChatInterface.module.css */
+
+.messagesContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messagesContainer::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+/* Media query for mobile responsiveness */
+@media (max-width: 768px) {
+  .userMessage, 
+  .aiMessage {
+    max-width: 90%;
+  }
+
+  .messagesContainer {
+    padding: 12px;
+  }
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* src/Styles/ChatInterface.module.css */
+
+.aiResponseContainer {
+  background-color: #f9fafb; /* Light background for response container */
+  padding: 20px;
+  border-radius: 10px;
+  margin: 15px 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  font-family: 'Sometype Mono', monospace; /* Apply the font to the AI response container */
+}
+
+.aiResponseHeader {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-top: 10px;
+}
+
+.aiResponseText {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #4b5563;
+  margin: 10px 0;
+}
+
+.bulletPoints {
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+.bulletPoint {
+  color: #374151;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.codeBlock {
+  background-color: #1e293b;
+  color: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.inlineCode {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.challengePrompt {
+  background-color: #dbeafe;
+  color: #1e40af;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  font-weight: 500;
+}
+
+.hint {
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 10px;
+  border-left: 4px solid #f59e0b;
+  border-radius: 4px;
+  margin-top: 15px;
+  font-size: 0.95rem;
+}
+/* src/Styles/ChatInterface.module.css */
 .buttonSection {
   display: flex;
-  flex-wrap: wrap; /* Allow buttons to wrap to the next row */
-  justify-content: flex-start; /* Align buttons to the left */
-  gap: 8px; /* Smaller spacing between buttons */
-  padding: 8px 12px; /* Reduce padding around the button container */
+  flex-direction: column; /* Stack button rows vertically */
+  gap: 8px; /* Space between button rows */
+  padding: 8px 12px; /* Padding around the button container */
   background-color: #ffffff;
   border-top: 1px solid #e0e0e0;
 }
 
-/* Buttons for quick replies */
+.buttonRow {
+  display: flex; /* Use flexbox for button alignment */
+  justify-content: flex-start; /* Align buttons to the left */
+  gap: 8px; /* Space between buttons in the same row */
+}
+
+/* Button styles */
 .customButton {
   background-color: transparent;
   border: 2px solid #4caf50; /* Green border */
   color: #4caf50; /* Green text */
-  padding: 6px 14px; /* Smaller padding for the buttons */
-  font-size: 0.8rem; /* Slightly smaller font size */
+  padding: 4px 10px; /* Reduced padding for larger text */
+  font-size: 15px; /* Increased font size */
   font-weight: bold;
   text-align: center;
   border-radius: 20px; /* Rounded edges */
   cursor: pointer;
   transition: all 0.3s ease;
-  
   box-sizing: border-box;
   white-space: nowrap; /* Ensure text stays in a single line */
+  font-family: 'IBM Plex Sans' , monospace;
 }
 
 .customButton:hover {
   background-color: #4caf50; /* Green fill on hover */
-  color: #ffffff; /* White text on hover */
+  color: white; /* White text on hover */
 }
 
 .customButton:focus {
   outline: none;
   box-shadow: 0 0 5px rgba(76, 175, 80, 0.7); /* Subtle green glow */
+}
+
+.button1 {
+  flex: 0 0 35%; 
+}
+
+.button2 {
+  flex: 0 0 35%; 
+}
+
+.button3 {
+  flex: 0 0 40%; 
+}
+
+.button4 {
+  flex: 0 0 40%; 
 }

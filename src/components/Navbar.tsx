@@ -54,10 +54,21 @@ const Navbar: React.FC = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const feedbackLink = "https://calendly.com/adityaramteke-1357/30min";
+
   return (
     <nav className={styles.navbar}>
       <h1 className={styles.title}>plato</h1>
       <div className={styles.navLinks}>
+      <div className={styles.feedbackSection}>
+          <span className={styles.feedbackText}>Have Feedback?</span>
+          <button 
+            className={styles.feedbackButton} 
+            onClick={() => window.open(feedbackLink, '_blank')} // Open link in a new tab
+          >
+            Talk to Founders
+          </button>
+        </div>
         {isAuthenticated ? (
           <div className={styles.userMenu}>
             <button onClick={toggleMenu} className={styles.userButton}>

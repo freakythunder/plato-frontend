@@ -81,3 +81,36 @@
 .loginButton:hover {
     background-color: #2980b9; /* Darker shade on hover */
 }
+
+.feedbackSection {
+    display: flex;
+    align-items: center;
+    gap:  10px;
+}
+
+.feedbackText {
+    font-size: 18px;
+    color: #060808;
+    font-family: 'sometype mono' ;
+    
+    font-weight: bold;
+    margin: 0;
+}
+
+.feedbackButton {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.feedbackButton:hover {
+    background-color: #45a049; /* Darker green on hover */
+    transform: scale(1.05); /* Slightly enlarge button on hover */
+}

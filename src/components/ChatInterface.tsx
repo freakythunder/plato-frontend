@@ -9,7 +9,7 @@ import Chat from './Chat'; // Import the Chat component
 
 interface ChatInterfaceProps {
   code: string; // Function to get the current code from IDE
-  
+
 }
 
 
@@ -95,10 +95,10 @@ const ChatInterface = forwardRef<unknown, ChatInterfaceProps>(({ code }, ref) =>
   };
   const handleSendMessage = async (message: string) => {
     if (!message.trim() || isLoading) return;
-  
+
     setIsLoading(true);
     setError(null);
-  
+
     // Store only the clean message in the userMessage
     const newUserMessage: Message = {
       _id: Date.now().toString(),
@@ -107,29 +107,31 @@ const ChatInterface = forwardRef<unknown, ChatInterfaceProps>(({ code }, ref) =>
       aiResponse: "AI is thinking...",
       timestamp: new Date().toISOString(),
     };
-  
+
     setMessages(prev => [...prev, newUserMessage]);
-  
+
     try {
       // Append the code only for backend processing
       const backendMessage =
         message === "I need hint for this challenge"
           ? `${message}. Here is my code: ${code}`
           : message;
-  
+
       const response = await sendMessage(backendMessage);
       if (response.success) {
         setMessages(prev =>
           prev.map(msg =>
             msg._id === newUserMessage._id
               ? {
-                  ...msg,
-                  aiResponse: response.data.aiResponse || "No response",
-                  timestamp: new Date().toISOString(),
-                }
+                ...msg,
+                aiResponse: response.data.aiResponse || "No response",
+                timestamp: new Date().toISOString(),
+              }
               : msg
           )
         );
+
+
       } else {
         setError(response.message || "Failed to send message");
       }
@@ -140,7 +142,7 @@ const ChatInterface = forwardRef<unknown, ChatInterfaceProps>(({ code }, ref) =>
       setIsLoading(false);
     }
   };
-  
+
   const handleSend = (message: string) => {
     handleSendMessage(message);
   };
@@ -221,30 +223,24 @@ const ChatInterface = forwardRef<unknown, ChatInterfaceProps>(({ code }, ref) =>
         <div ref={messagesEndRef} />
       </div>
       <div className={styles.buttonSection}>
-        <button
-          className={styles.customButton}
-          onClick={() => handleButtonClick("I didn't understand the concept properly")}
-        >
-          I didn't understand the concept properly
-        </button>
-        <button
-          className={styles.customButton}
-          onClick={() => handleButtonClick("I want to practice anothere example")}
-        >
-          I want to practice anothere example
-        </button>
-        <button
-          className={styles.customButton}
-          onClick={() => handleButtonClick("Let's move on to the next sub-topic!")}
-        >
-          Let's move on to the next topic!
-        </button>
-        <button
-          className={styles.customButton}
-          onClick={() => handleButtonClick("I need hint for this challenge")}
-        >
-          I need hint for this challenge
-        </button>
+        {/* First Row of Buttons */}
+        <div className={styles.buttonRow}>
+          <button className={`${styles.customButton} ${styles.button1}`} onClick={() => handleButtonClick("I didn't understand the concept properly")}>
+            I didn't understand the concept properly
+          </button>
+          <button className={`${styles.customButton} ${styles.button2}`} onClick={() => handleButtonClick("I want to practice another example")}>
+            I want to practice another example
+          </button>
+        </div>
+        {/* Second Row of Buttons */}
+        <div className={styles.buttonRow}>
+          <button className={`${styles.customButton} ${styles.button3}`} onClick={() => handleButtonClick("Let's move on to the next sub-topic!")}>
+            Let's move on to the next topic!
+          </button>
+          <button className={`${styles.customButton} ${styles.button4}`} onClick={() => handleButtonClick("I need hint for this challenge")}>
+            I need hint for this challenge
+          </button>
+        </div>
       </div>
       <Chat onSend={handleSend} />
       {error && <div className={styles.errorMessage}>{error}</div>}
