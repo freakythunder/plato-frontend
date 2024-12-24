@@ -6,12 +6,13 @@ import { executeCode } from '../services/codeService';
 interface IDEProps {
   height: number;
   onRun: (output: string) => void;
+  
 }
 export interface IDERef {
   getCode: () => string; // Method to get the current code
 }
 
-const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
+const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun  }, ref) => {
   const placeholderText = 
   `
   /*
@@ -27,9 +28,14 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
   const editorRef = useRef<any>(null);
   const hasRunButtonClicked = useRef<boolean>(false);
   const runButtonRef = useRef<HTMLButtonElement | null>(null);
+  
   useImperativeHandle(ref, () => ({
     getCode: () => code || '', // Return the current code or an empty string
   }));
+
+ 
+
+
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
 
@@ -42,8 +48,10 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
 
   const handleCodeChange = (value: string | undefined) => {
     if (value !== undefined && value !== placeholderText) {
-      setCode(value);
-      setIsPlaceholderActive(false);
+      // Only update the code if it is different from the current code
+        setCode(value);
+        setIsPlaceholderActive(false);
+      
     }
   };
 

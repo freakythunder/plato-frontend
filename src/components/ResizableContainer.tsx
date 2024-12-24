@@ -1,17 +1,20 @@
 import React, { useState, useRef, useCallback } from 'react';
 import HorizontalSplitter from './horizontalSplitter';
-import ChatInterface, { ChatInterfaceRef as ImportedChatInterfaceRef } from './ChatInterface'; // Alias the imported type
+import ChatInterface from './ChatInterface'; // Alias the imported type
 import styles from '../Styles/ResizableContainer.module.css';
 
-interface ChatInterfaceRef {
-}
+
 
 const ResizableContainer: React.FC = () => {
-  const [leftWidth, setLeftWidth] = useState(30);
+  const [leftWidth, setLeftWidth] = useState(45);
+  const [code, setCode] = useState<string>(''); 
   const containerRef = useRef<HTMLDivElement>(null);
   const isResizing = useRef(false);
-  const chatInterfaceRef = useRef<ImportedChatInterfaceRef>(null); // Correct ref initialization
-
+   // Correct ref initialization
+   const handleNewAIMessage = () => {
+    // Logic to handle new AI message
+    console.log("New AI message received, clearing IDE code.");
+  };
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isResizing.current || !containerRef.current) return;
@@ -40,11 +43,11 @@ const ResizableContainer: React.FC = () => {
   return (
     <div className={styles.container} ref={containerRef}>
       <div className={styles.leftPane} style={{ width: `${leftWidth}%` }}>
-      <ChatInterface ref={chatInterfaceRef} />
+      <ChatInterface code={code}  /> {/* Pass the trigger function */}
       </div>
       <div className={styles.resizer} onMouseDown={handleMouseDown} />
       <div className={styles.rightPane} style={{ width: `${100 - leftWidth}%` }}>
-        <HorizontalSplitter chatInterfaceRef={chatInterfaceRef}/>
+      <HorizontalSplitter onCodeChange={setCode}  />
       </div>
     </div>
   );

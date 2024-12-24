@@ -4,15 +4,17 @@ import styles from '../Styles/ChatInterface.module.css';
 import { sendMessage, getPastConversations, Message } from '../services/chatService';
 import FormattedAIResponse from './FormattedAiResponse';
 import { useAuth } from '../context/AuthContext';
+import Chat from './Chat'; // Import the Chat component
 
 
-export interface ChatInterfaceRef {
-  addMessage: (message: string) => void;
+interface ChatInterfaceProps {
+  code: string; // Function to get the current code from IDE
+  
 }
 
 
 
-const ChatInterface = forwardRef<ChatInterfaceRef>((_, ref) => {
+const ChatInterface = forwardRef<unknown, ChatInterfaceProps>(({ code }, ref) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,11 +23,11 @@ const ChatInterface = forwardRef<ChatInterfaceRef>((_, ref) => {
   const token = localStorage.getItem('token');
   const username = token ? JSON.parse(atob(token.split('.')[1])).username : null;
 
-const scrollToBottom = useCallback(() => {
-  setTimeout(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, 100);
-}, []);
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  }, []);
 
   useEffect(() => {
     loadPastConversationsAndWelcomeMessage();
@@ -37,26 +39,22 @@ const scrollToBottom = useCallback(() => {
     }
   }, [messages]);
 
-  useImperativeHandle(ref, () => ({
-    addMessage(message: string) {
-      handleSendMessage(message);
-    },
-  }));
+
 
   const loadPastConversationsAndWelcomeMessage = async () => {
     try {
       const response = await getPastConversations();
-      
+
       let chats: Message[] = [];
       if (response.success) {
-  
+
         if (Array.isArray(response.data)) {
           chats = response.data;
-        } 
+        }
         else if (response.data && 'chats' in response.data) {
           chats = (response.data as { chats?: Message[] }).chats || [];
         }
-        
+
         const validatedChats = chats.map(chat => ({
           _id: chat._id || Date.now().toString(),
           user_id: chat.user_id || chat.userId || '',
@@ -64,13 +62,13 @@ const scrollToBottom = useCallback(() => {
           aiResponse: chat.aiResponse || '',
           timestamp: chat.timestamp || new Date().toISOString()
         }));
-  
-        const sortedChats = validatedChats.sort((a, b) => 
+
+        const sortedChats = validatedChats.sort((a, b) =>
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
         );
-  
+
         setMessages(sortedChats);
-        
+
         if (welcomeMessage) {
           const welcomeMsg: Message = {
             _id: Date.now().toString(),
@@ -100,38 +98,27 @@ const scrollToBottom = useCallback(() => {
   
     setIsLoading(true);
     setError(null);
-    const normalizedMessage = message.trim().toLowerCase();
-
-    // Create a new user message
-    let userMessageContent = message; // Default to the input message
   
-    if (normalizedMessage === "next") {
-      userMessageContent = "Next";
-    } else if (normalizedMessage === "let's begin") {
-      userMessageContent = "Let's begin";
-    } else {
-      userMessageContent = "Need help";
-    }
-    // Create a new user message
+    // Store only the clean message in the userMessage
     const newUserMessage: Message = {
       _id: Date.now().toString(),
       user_id: username || '',
-      userMessage: userMessageContent,
-      aiResponse: "",
+      userMessage: message, // This remains "I need hint for this challenge"
+      aiResponse: "AI is thinking...",
       timestamp: new Date().toISOString(),
     };
   
-    // Check if the message starts with "Next"
-    
-    // Add the user message to the state immediately
     setMessages(prev => [...prev, newUserMessage]);
   
     try {
-      // Send the message to the AI
-      const response = await sendMessage(message);
+      // Append the code only for backend processing
+      const backendMessage =
+        message === "I need hint for this challenge"
+          ? `${message}. Here is my code: ${code}`
+          : message;
   
+      const response = await sendMessage(backendMessage);
       if (response.success) {
-        // Update the AI response in the state
         setMessages(prev =>
           prev.map(msg =>
             msg._id === newUserMessage._id
@@ -144,31 +131,27 @@ const scrollToBottom = useCallback(() => {
           )
         );
       } else {
-        throw new Error('Invalid response from server');
+        setError(response.message || "Failed to send message");
       }
     } catch (err) {
-      console.error('Error sending message:', err);
-      setError('Failed to send message');
-  
-      // Update the message with an error response
-      setMessages(prev =>
-        prev.map(msg =>
-          msg._id === newUserMessage._id
-            ? {
-                ...msg,
-                aiResponse: "Error: Failed to get response",
-              }
-            : msg
-        )
-      );
+      console.error("Error sending message:", err);
+      setError("Failed to send message");
     } finally {
       setIsLoading(false);
     }
   };
   
+  const handleSend = (message: string) => {
+    handleSendMessage(message);
+  };
+
+
+  const handleButtonClick = async (buttonText: string) => {
 
 
 
+    handleSendMessage(buttonText); // Send the message with code
+  };
   // Modify the getAIResponseMessage to handle string responses
   const getAIResponseMessage = (response: Message['aiResponse']): {
     user_id?: string;
@@ -221,12 +204,12 @@ const scrollToBottom = useCallback(() => {
       <div className={styles.messagesContainer}>
         {messages.map((msg) => (
           <div key={msg._id} className={styles.messageWrapper}>
-        {msg.userMessage && (
-            <div className={styles.userMessage}>
+            {msg.userMessage && (
+              <div className={styles.userMessage}>
                 <p className={styles.messageContent}>{msg.userMessage}</p>
                 <div className={styles.timestamp}>{formatTimestamp(msg.timestamp)}</div>
-            </div>
-        )}
+              </div>
+            )}
             {msg.aiResponse && (
               <div className={styles.aiMessage}>
                 <FormattedAIResponse response={getAIResponseMessage(msg.aiResponse)} />
@@ -237,6 +220,33 @@ const scrollToBottom = useCallback(() => {
         ))}
         <div ref={messagesEndRef} />
       </div>
+      <div className={styles.buttonSection}>
+        <button
+          className={styles.customButton}
+          onClick={() => handleButtonClick("I didn't understand the concept properly")}
+        >
+          I didn't understand the concept properly
+        </button>
+        <button
+          className={styles.customButton}
+          onClick={() => handleButtonClick("I want to practice anothere example")}
+        >
+          I want to practice anothere example
+        </button>
+        <button
+          className={styles.customButton}
+          onClick={() => handleButtonClick("Let's move on to the next sub-topic!")}
+        >
+          Let's move on to the next topic!
+        </button>
+        <button
+          className={styles.customButton}
+          onClick={() => handleButtonClick("I need hint for this challenge")}
+        >
+          I need hint for this challenge
+        </button>
+      </div>
+      <Chat onSend={handleSend} />
       {error && <div className={styles.errorMessage}>{error}</div>}
     </div>
   );
