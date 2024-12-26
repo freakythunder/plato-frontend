@@ -9,6 +9,8 @@ interface AuthContextType {
   localLogout: () => void;
   welcomeMessage: string | null;
   clearWelcomeMessage: () => void;
+  shouldClearCode: boolean; // New variable
+  setShouldClearCode: (value: boolean) => void; // New function
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,6 +19,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [username, setUsername] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
+  const [shouldClearCode, setShouldClearCode] = useState<boolean>(false); // Initialize the new variable
+
 
   const login = (username: string, token: string , message :string) => {
     localStorage.setItem('username', username);
@@ -31,9 +35,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('IsNewUser ', 'false'); // Store returning user status
       console.log('Setting IsNewUser  to false'); // Log the action
     }
-    
-
-    
     setUsername(username);
     setIsAuthenticated(true);
   };
@@ -75,7 +76,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login, 
       localLogout,
       welcomeMessage,
-      clearWelcomeMessage 
+      clearWelcomeMessage,
+      shouldClearCode,
+      setShouldClearCode,
     }}>
       {children}
     </AuthContext.Provider>

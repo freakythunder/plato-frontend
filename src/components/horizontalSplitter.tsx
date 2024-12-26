@@ -2,10 +2,12 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import IDE, { IDERef } from './IDE';
 import ResizableOutput from './Output';
 import styles from '../Styles/HorizontalSplitter.module.css';
+import { useAuth } from '../context/AuthContext';
+
 interface HorizontalSplitterProps {
   onCodeChange: (code: string) => void; 
-  
 }
+
 const HorizontalSplitter: React.FC<HorizontalSplitterProps> = ({ onCodeChange}) => {
   const [outputHeightPercent, setOutputHeightPercent] = useState(30); // Output height in %
   const [ideHeightPercent, setIdeHeightPercent] = useState(70); // IDE height in %
@@ -14,6 +16,17 @@ const HorizontalSplitter: React.FC<HorizontalSplitterProps> = ({ onCodeChange}) 
   const splitterRef = useRef<HTMLDivElement>(null);
   const isResizing = useRef(false);
   const ideRef = useRef<IDERef>(null);
+  
+  const { shouldClearCode, setShouldClearCode } = useAuth();
+
+
+  useEffect(() => {
+    if (shouldClearCode) {
+      setOutput(''); // Clear the output when shouldClearCode is true
+      setShouldClearCode(false); // Reset the variable
+      console.log("Output cleared in HorizontalSplitter"); // Optional: Log for debugging
+    }
+  }, [shouldClearCode, setShouldClearCode]);
   const handleGetCode = () => {
     const currentCode = ideRef.current?.getCode();
     if (currentCode) {
@@ -82,7 +95,7 @@ const HorizontalSplitter: React.FC<HorizontalSplitterProps> = ({ onCodeChange}) 
     <div ref={containerRef} className={styles.splitterContainer} style={{ position: 'relative', height: '100%' }}>
       {/* IDE Section */}
       <div className={styles.ideSection} style={{ height: `${ideHeightPercent}%`, overflow: 'hidden' }}>
-        <IDE ref={ideRef} height={ideHeightPercent} onRun={handleRunCode}  />
+      <IDE ref={ideRef} height={ideHeightPercent} onRun={handleRunCode} />
       </div>
 
       {/* Splitter Section */}

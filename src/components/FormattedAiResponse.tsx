@@ -57,7 +57,7 @@ const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) =
           h3: ({ ...props }) => <h3 className={styles.aiResponseHeader} {...props} />,
           p: ({ node, children, ...props }) => {
             const content = String(children).toLowerCase();
-            const isChallenge = content.includes("try this challenge") || content.includes("challenge:");
+            const isChallenge = content.includes("challenge:");
             return (
               <p className={isChallenge ? styles.challengePrompt : styles.aiResponseText} {...props}>
                 {children}
@@ -66,11 +66,21 @@ const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) =
           },
           ul: ({ ...props }) => <ul className={styles.bulletPoints} {...props} />,
           li: ({ ...props }) => <li className={styles.bulletPoint} {...props} />,
-          
-          blockquote: ({ node, ...props }) => (
-            React.createElement('div', { className: styles.hint, ...props })
+          blockquote: ({ children, ...props }) => (
+            <blockquote className={styles.hint} {...props}>
+              {children}
+            </blockquote>
           ),
-          
+          strong: ({ children, ...props }) => (
+            <strong className={styles.boldText} {...props}>
+              {children}
+            </strong>
+          ),
+          em: ({ children, ...props }) => (
+            <em className={styles.italicText} {...props}>
+              {children}
+            </em>
+          ),
         }}
       >
         {markdownContent}

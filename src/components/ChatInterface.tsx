@@ -9,12 +9,17 @@ import Chat from './Chat'; // Import the Chat component
 
 interface ChatInterfaceProps {
   code: string; // Function to get the current code from IDE
-
+  
 }
 
 
+export interface ChatInterfaceRef {
+  clearCode: () => void; 
+}
 
-const ChatInterface = forwardRef<unknown, ChatInterfaceProps>(({ code }, ref) => {
+
+const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }, ref) => {
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +27,8 @@ const ChatInterface = forwardRef<unknown, ChatInterfaceProps>(({ code }, ref) =>
   const { welcomeMessage, clearWelcomeMessage } = useAuth();
   const token = localStorage.getItem('token');
   const username = token ? JSON.parse(atob(token.split('.')[1])).username : null;
+  const { setShouldClearCode } = useAuth();
+
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -112,10 +119,16 @@ const ChatInterface = forwardRef<unknown, ChatInterfaceProps>(({ code }, ref) =>
 
     try {
       // Append the code only for backend processing
-      const backendMessage =
-        message === "I need hint for this challenge"
-          ? `${message}. Here is my code: ${code}`
-          : message;
+      let backendMessage;
+
+      // Check if the message is "Let's move on to the next topic!"
+      if (message === "Let's move on to the next sub-topic!" || message === "I want to practice another example") {
+        backendMessage = message; // Send the message as is
+      } else {
+        // Append the code only for backend processing for other messages
+        backendMessage = `${message}. Here is my code: ${code}`;
+      }
+
 
       const response = await sendMessage(backendMessage);
       if (response.success) {
@@ -147,11 +160,15 @@ const ChatInterface = forwardRef<unknown, ChatInterfaceProps>(({ code }, ref) =>
     handleSendMessage(message);
   };
 
+ 
+
 
   const handleButtonClick = async (buttonText: string) => {
+    if (buttonText === "Let's move on to the next sub-topic!" || buttonText === "I want to practice another example") {
+      setShouldClearCode(true); // Set the variable to true when the button is clicked
+      console.log("set to true from chat");
 
-
-
+    }
     handleSendMessage(buttonText); // Send the message with code
   };
   // Modify the getAIResponseMessage to handle string responses
@@ -225,17 +242,16 @@ const ChatInterface = forwardRef<unknown, ChatInterfaceProps>(({ code }, ref) =>
       <div className={styles.buttonSection}>
         {/* First Row of Buttons */}
         <div className={styles.buttonRow}>
-          <button className={`${styles.customButton} ${styles.button1}`} onClick={() => handleButtonClick("I didn't understand the concept properly")}>
-            I didn't understand the concept properly
+          <button className={`${styles.customButton} ${styles.button1}`} onClick={() => handleButtonClick("I am getting an error.")}>
+            I am getting an error.
           </button>
           <button className={`${styles.customButton} ${styles.button2}`} onClick={() => handleButtonClick("I want to practice another example")}>
             I want to practice another example
           </button>
         </div>
-        {/* Second Row of Buttons */}
         <div className={styles.buttonRow}>
           <button className={`${styles.customButton} ${styles.button3}`} onClick={() => handleButtonClick("Let's move on to the next sub-topic!")}>
-            Let's move on to the next topic!
+            Let's move on to the next sub-topic!
           </button>
           <button className={`${styles.customButton} ${styles.button4}`} onClick={() => handleButtonClick("I need hint for this challenge")}>
             I need hint for this challenge
@@ -246,6 +262,8 @@ const ChatInterface = forwardRef<unknown, ChatInterfaceProps>(({ code }, ref) =>
       {error && <div className={styles.errorMessage}>{error}</div>}
     </div>
   );
+
 });
+
 
 export default ChatInterface;

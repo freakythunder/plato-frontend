@@ -2,6 +2,8 @@ import React, { useRef, useEffect } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import styles from '../Styles/ResizableOutput.module.css';
+import { useAuth } from '../context/AuthContext';
+
 
 interface OutputProps {
   output: string;
@@ -13,6 +15,7 @@ interface OutputProps {
 
 const Output: React.FC<OutputProps> = ({ output, isLoading, onClose, containerWidth, height }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+
 
   return (
     <div

@@ -7,11 +7,14 @@ import styles from '../Styles/ResizableContainer.module.css';
 
 const ResizableContainer: React.FC = () => {
   const [leftWidth, setLeftWidth] = useState(45);
-  const [code, setCode] = useState<string>(''); 
+  const [code, setCode] = useState<string>('');
   const containerRef = useRef<HTMLDivElement>(null);
   const isResizing = useRef(false);
-   // Correct ref initialization
-   const handleNewAIMessage = () => {
+  // Correct ref initialization
+  const chatInterfaceRef = useRef<any>(null); // Create a ref for ChatInterface
+
+
+  const handleNewAIMessage = () => {
     // Logic to handle new AI message
     console.log("New AI message received, clearing IDE code.");
   };
@@ -39,15 +42,19 @@ const ResizableContainer: React.FC = () => {
     document.addEventListener('mouseup', handleMouseUp);
   }, [handleMouseMove, handleMouseUp]);
 
-
   return (
     <div className={styles.container} ref={containerRef}>
       <div className={styles.leftPane} style={{ width: `${leftWidth}%` }}>
-      <ChatInterface code={code}  /> {/* Pass the trigger function */}
+        <ChatInterface code={code} /> {/* Pass the clearCode function */}
       </div>
       <div className={styles.resizer} onMouseDown={handleMouseDown} />
       <div className={styles.rightPane} style={{ width: `${100 - leftWidth}%` }}>
-      <HorizontalSplitter onCodeChange={setCode}  />
+        <HorizontalSplitter
+          onCodeChange={(code) => {
+            console.log('Passing code to HorizontalSplitter:', code);
+            setCode(code);
+          }}
+        />
       </div>
     </div>
   );

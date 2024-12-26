@@ -2,39 +2,46 @@ import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } f
 import Editor from '@monaco-editor/react';
 import styles from '../Styles/IDE.module.css';
 import { executeCode } from '../services/codeService';
+import { useAuth } from '../context/AuthContext';
 
 interface IDEProps {
   height: number;
   onRun: (output: string) => void;
-  
+   
 }
 export interface IDERef {
-  getCode: () => string; // Method to get the current code
+  getCode: () => string; 
 }
 
-const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun  }, ref) => {
+const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
   const placeholderText = 
   `
   /*
   This is the code editor where you will practice writing code. 
-  Just follow the instructions in the section to the left. 
-  Once you are ready, click on "Let's begin" to the bottom right. 
+  Just follow the instructions in the section to the left.  
   */
   `
- 
+  const { shouldClearCode, setShouldClearCode } = useAuth();
   const [code, setCode] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPlaceholderActive, setIsPlaceholderActive] = useState<boolean>(true);
   const editorRef = useRef<any>(null);
   const hasRunButtonClicked = useRef<boolean>(false);
   const runButtonRef = useRef<HTMLButtonElement | null>(null);
-  
+
   useImperativeHandle(ref, () => ({
-    getCode: () => code || '', // Return the current code or an empty string
+    getCode: () => code,
   }));
+  
 
  
-
+  useEffect(() => {
+    if (shouldClearCode) {
+      setCode(''); // Clear the code if the variable is true
+      setShouldClearCode(false); // Reset the variable
+      console.log("cleared in ide");
+    }
+  }, [shouldClearCode, setShouldClearCode]);
 
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;

@@ -182,18 +182,37 @@
 /* src/Styles/ChatInterface.module.css */
 .buttonSection {
   display: flex;
-  flex-direction: column; /* Stack button rows vertically */
+  flex-direction: column; 
+  flex-wrap: wrap;/* Stack button rows vertically */
   gap: 8px; /* Space between button rows */
   padding: 8px 12px; /* Padding around the button container */
   background-color: #ffffff;
   border-top: 1px solid #e0e0e0;
 }
 
+/* Button row styling */
 .buttonRow {
   display: flex; /* Use flexbox for button alignment */
   justify-content: flex-start; /* Align buttons to the left */
   gap: 8px; /* Space between buttons in the same row */
+  flex-wrap: wrap; /* Allow wrapping to a new line if space is limited */
+  flex: 1; /* Allow button rows to grow and shrink */
+  min-width: 200px; /* Set a minimum width for button rows */
 }
+
+/* Media query for responsiveness */
+@media (max-width: 600px) {
+  .buttonRow {
+    flex-direction: column; /* Stack buttons vertically on small screens */
+    align-items: stretch; /* Stretch buttons to fill available space */
+  }
+
+  .customButton {
+    width: 100%; /* Make buttons take full width when stacked */
+  }
+}
+
+
 
 /* Button styles */
 .customButton {
