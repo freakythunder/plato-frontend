@@ -1,7 +1,8 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback , useEffect } from 'react';
 import HorizontalSplitter from './horizontalSplitter';
 import ChatInterface from './ChatInterface'; // Alias the imported type
 import styles from '../Styles/ResizableContainer.module.css';
+import { useAuth } from '../context/AuthContext';
 
 
 
@@ -10,14 +11,7 @@ const ResizableContainer: React.FC = () => {
   const [code, setCode] = useState<string>('');
   const containerRef = useRef<HTMLDivElement>(null);
   const isResizing = useRef(false);
-  // Correct ref initialization
-  const chatInterfaceRef = useRef<any>(null); // Create a ref for ChatInterface
-
-
-  const handleNewAIMessage = () => {
-    // Logic to handle new AI message
-    console.log("New AI message received, clearing IDE code.");
-  };
+  const { shouldClearCode, setShouldClearCode } = useAuth();
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isResizing.current || !containerRef.current) return;
@@ -29,7 +23,12 @@ const ResizableContainer: React.FC = () => {
       setLeftWidth(newLeftWidth);
     }
   }, []);
-
+  useEffect(() => {
+    if (shouldClearCode) {
+      setCode(''); // Clear the code if the variable is true
+      console.log("cleared in chat");
+    }
+  }, [shouldClearCode, setShouldClearCode]);
   const handleMouseUp = useCallback(() => {
     isResizing.current = false;
     document.removeEventListener('mousemove', handleMouseMove);

@@ -126,7 +126,13 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
         backendMessage = message; // Send the message as is
       } else {
         // Append the code only for backend processing for other messages
-        backendMessage = `${message}. Here is my code: ${code}`;
+        if (!code.trim()) {
+          // If code is empty, send the message directly
+          backendMessage = message; // Send the message as is
+      } else {
+          // Append the code only for backend processing for other messages
+          backendMessage = `${message}. Here is my code: ${code}`;
+      }
       }
 
 
