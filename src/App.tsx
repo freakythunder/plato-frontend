@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
 const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+  console.log("Test");
   const isAuthenticated = !!localStorage.getItem('token');
   return isAuthenticated ? children : <Navigate to="/" />;
 };
