@@ -31,6 +31,8 @@ jobs:
 
       # Step 4: Build the React app
       - name: Build React App
+        env:
+          CI: false
         run: npm run build
 
       # Step 5: Archive the build folder
