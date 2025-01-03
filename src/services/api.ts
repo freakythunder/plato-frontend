@@ -1,11 +1,11 @@
 // src/services/api.ts
 import axios from 'axios';
 
-// const apiUrl = process.env.REACT_APP_API_URL;
-// console.log('API URL:', apiUrl); // For debugging
+const apiUrl = process.env.REACT_APP_API_URL;
+console.log('API URL:', apiUrl); // For debugging
 
 const api = axios.create({
-  baseURL: "https://plato-backend-fzfaeqguehfaaahq.eastus2-01.azurewebsites.net",
+  baseURL: apiUrl,
   timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
