@@ -36,6 +36,7 @@ const HomePage: React.FC = () => {
       }, 1000);
 
       try {
+        
         const response = await api.post("/auth/login", {
           username: user?.email,
           password: user?.name, // Replace with proper credentials
