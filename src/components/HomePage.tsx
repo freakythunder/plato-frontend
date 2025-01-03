@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
       }, 1000);
 
       try {
-        
+        console.log("trying to send request to backend");
         const response = await api.post("/auth/login", {
           username: user?.email,
           password: user?.name, // Replace with proper credentials
