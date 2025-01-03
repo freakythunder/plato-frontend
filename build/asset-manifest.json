@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/static/css/main.d281abe4.css",
+    "main.js": "/static/js/main.f53b7175.js",
+    "static/media/icons8-google.svg": "/static/media/icons8-google.9a7800d06783d80a1c12249a8ca58e9d.svg",
+    "index.html": "/index.html",
+    "main.d281abe4.css.map": "/static/css/main.d281abe4.css.map",
+    "main.f53b7175.js.map": "/static/js/main.f53b7175.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.d281abe4.css",
+    "static/js/main.f53b7175.js"
+  ]
+}
