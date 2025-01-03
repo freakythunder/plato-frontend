@@ -33,6 +33,7 @@ jobs:
       - name: Build React App
         env:
           CI: false
+          REACT_APP_API_URL : "https://plato-backend-fzfaeqguehfaaahq.eastus2-01.azurewebsites.net"
         run: npm run build
 
       # Step 5: Archive the build folder
