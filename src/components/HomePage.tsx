@@ -36,6 +36,7 @@ const HomePage: React.FC = () => {
       }, 1000);
 
       try {
+        console.log("Hello World");
         const response = await api.post("/auth/login", {
           username: user?.email,
           password: user?.name, // Replace with proper credentials
@@ -95,7 +96,7 @@ const HomePage: React.FC = () => {
 
           {/* Main Content */}
           <div className={styles.content}>
-            <h1 className={styles.title}>Welcome to Plato</h1>
+            <h1 className={styles.title}>Welcome to Plato application</h1>
             <p className={styles.subtitle}>
               We've built a personal tutor to help you learn JavaScript! This is our first
               prototype, and we'd love your feedback. Book a call with the founders to share your

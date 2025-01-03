@@ -30,7 +30,7 @@ jobs:
         run: npm install
 
       # Step 4: Build the React app
-      - name: Build React App
+      - name: Build React 
         env:
           CI: false
           REACT_APP_API_URL : "https://plato-backend-fzfaeqguehfaaahq.eastus2-01.azurewebsites.net"
