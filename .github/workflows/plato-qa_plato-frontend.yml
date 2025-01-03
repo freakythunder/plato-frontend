@@ -55,7 +55,8 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
+    permissions:
+      id-token: write 
     steps:
       # Step 1: Download the artifact
       - name: Download Artifact
