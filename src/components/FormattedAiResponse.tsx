@@ -1,5 +1,3 @@
-// src/components/FormattedAiResponse.tsx
-
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -31,6 +29,8 @@ const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) =
   const markdownContent = extractMarkdownContent();
   if (!markdownContent) return null;
 
+  const formattedTimestamp = new Date(response.timestamp).toLocaleString(); // Format timestamp for readability
+
   return (
     <div className={styles.aiResponseContainer}>
       <ReactMarkdown
@@ -40,7 +40,7 @@ const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) =
             const match = /language-(\w+)/.exec(className || '');
             return !inline && match ? (
               <SyntaxHighlighter
-                style={vscDarkPlus as any}
+                style={vscDarkPlus as any} // Black-themed code block
                 language={match[1]}
                 className={styles.codeBlock}
                 PreTag="div"
@@ -57,9 +57,16 @@ const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) =
           h3: ({ ...props }) => <h3 className={styles.aiResponseHeader} {...props} />,
           p: ({ node, children, ...props }) => {
             const content = String(children).toLowerCase();
-            const isChallenge = content.includes("challenge:");
+            const isChallenge = content.includes('challenge:');
+            const isExplanation = content.includes('explanation:') || content.includes('hint:');
+            const appliedClass = isChallenge
+              ? styles.challengePrompt
+              : isExplanation
+              ? styles.explanationBox
+              : styles.aiResponseText;
+
             return (
-              <p className={isChallenge ? styles.challengePrompt : styles.aiResponseText} {...props}>
+              <p className={appliedClass} {...props}>
                 {children}
               </p>
             );
@@ -85,6 +92,7 @@ const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) =
       >
         {markdownContent}
       </ReactMarkdown>
+      <div className={styles.timestamp}>{formattedTimestamp}</div> {/* Timestamp at the bottom */}
     </div>
   );
 };

@@ -109,12 +109,13 @@
 /* src/Styles/ChatInterface.module.css */
 
 .aiResponseContainer {
-  background-color: #f9fafb; /* Light background for response container */
+  background-color: #f9fafb; /* Light background for the container */
   padding: 20px;
   border-radius: 10px;
   margin: 15px 0;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  font-family: 'Sometype Mono', monospace; /* Apply the font to the AI response container */
+  font-family: 'Sometype Mono', monospace; /* Font for the AI response */
+  position: relative; /* For better positioning of elements */
 }
 
 .aiResponseHeader {
@@ -143,14 +144,14 @@
 }
 
 .codeBlock {
-  background-color: #1e293b;
-  color: #f8fafc;
+  background-color: #1e293b; /* Black background for the code block */
+  color: #f8fafc; /* White text for contrast */
   padding: 15px;
   border-radius: 8px;
   margin: 15px 0;
   font-size: 0.9rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  overflow-x: auto;
+  overflow-x: auto; /* Ensures code blocks scroll horizontally if needed */
 }
 
 .inlineCode {
@@ -162,8 +163,8 @@
 }
 
 .challengePrompt {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: #dbeafe; /* Light blue background for challenges */
+  color: #1e40af; /* Dark blue text for emphasis */
   padding: 15px;
   border-radius: 8px;
   margin-top: 15px;
@@ -179,66 +180,97 @@
   margin-top: 15px;
   font-size: 0.95rem;
 }
+
+.timestamp {
+  font-size: 0.85rem;
+  color: #9ca3af; /* Subtle grey for the timestamp */
+  text-align: left;
+  margin-top: 15px;
+  font-style: italic;
+}
+.challengePrompt {
+  background-color: #dbeafe; /* Light blue background */
+  color: #1e40af; /* Dark blue text */
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-weight: 500;
+  border: 1px solid #93c5fd; /* Slight border for definition */
+}
+
+.explanationBox {
+  background-color: #d1fae5; /* Light green background */
+  color: #065f46; /* Dark green text */
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-weight: 500;
+  border: 1px solid #6ee7b7; /* Slight border for definition */
+}
+
+.hint {
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 10px;
+  border-left: 4px solid #f59e0b;
+  border-radius: 4px;
+  margin-top: 15px;
+  font-size: 0.95rem;
+}
+
+
+
 /* src/Styles/ChatInterface.module.css */
 .buttonSection {
   display: flex;
-  flex-direction: column; 
-  flex-wrap: wrap;/* Stack button rows vertically */
-  gap: 8px; /* Space between button rows */
-  padding: 8px 12px; /* Padding around the button container */
+  flex-direction: row; /* Initially display buttons in a row */
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px; /* Reduced padding */
   background-color: #ffffff;
   border-top: 1px solid #e0e0e0;
 }
 
-/* Button row styling */
 .buttonRow {
-  display: flex; /* Use flexbox for button alignment */
-  justify-content: flex-start; /* Align buttons to the left */
-  gap: 8px; /* Space between buttons in the same row */
-  flex-wrap: wrap; /* Allow wrapping to a new line if space is limited */
-  flex: 1; /* Allow button rows to grow and shrink */
-  min-width: 200px; /* Set a minimum width for button rows */
+  display: flex;
+  justify-content: flex-start;
+  gap: 4px; /* Reduced gap */
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 200px;
 }
 
-/* Media query for responsiveness */
 @media (max-width: 600px) {
   .buttonRow {
-    flex-direction: column; /* Stack buttons vertically on small screens */
-    align-items: stretch; /* Stretch buttons to fill available space */
-  }
-
-  .customButton {
-    width: 100%; /* Make buttons take full width when stacked */
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 
-
-
-/* Button styles */
 .customButton {
   background-color: transparent;
-  border: 2px solid #4caf50; /* Green border */
-  color: #4caf50; /* Green text */
-  padding: 4px 10px; /* Reduced padding for larger text */
-  font-size: 15px; /* Increased font size */
+  border: 2px solid #4caf50;
+  color: #4caf50;
+  padding: 2px 8px; /* Significantly reduced padding */
+  font-size: 16px;
   font-weight: bold;
   text-align: center;
-  border-radius: 20px; /* Rounded edges */
+  border-radius: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-sizing: border-box;
-  white-space: nowrap; /* Ensure text stays in a single line */
+  white-space: nowrap;
   font-family: 'IBM Plex Sans' , monospace;
 }
 
 .customButton:hover {
-  background-color: #4caf50; /* Green fill on hover */
-  color: white; /* White text on hover */
+  background-color: #4caf50;
+  color: white;
 }
 
 .customButton:focus {
   outline: none;
-  box-shadow: 0 0 5px rgba(76, 175, 80, 0.7); /* Subtle green glow */
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.7);
 }
 
 .button1 {
@@ -250,9 +282,44 @@
 }
 
 .button3 {
-  flex: 0 0 40%; 
+  flex: 0 0 20%; 
 }
 
 .button4 {
   flex: 0 0 40%; 
+}
+
+.navButton {
+  background-color: #4CAF50; 
+  border: none;
+  color: #fff; 
+  padding: 8px 16px; 
+  font-size: 16px; 
+  font-weight: bold;
+  text-align: center;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  white-space: nowrap; 
+  font-family: 'IBM Plex Sans', monospace;
+  flex: 0 0 auto; 
+  margin: 0 8px 5px 8px; /* Add 5px margin bottom */ 
+}
+
+.navButton:hover {
+  background-color: #3e8e41; 
+  color: #fff; 
+}
+
+.navbuttonrow {
+  display: flex; 
+  justify-content: space-between; 
+  gap: 8px; 
+  flex-wrap: wrap; 
+  flex: 1; 
+  min-width: 200px; 
+  height: 40px;
+  flex: 0 0 auto;
+  padding: 8px; 
 }

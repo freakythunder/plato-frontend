@@ -4,6 +4,8 @@ import styles from '../Styles/Navbar.module.css';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { useAuth0 } from "@auth0/auth0-react";
+import Syllabus from './syllabus/syllabus';
+
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -15,8 +17,10 @@ const Navbar: React.FC = () => {
     try {
       console.log('Attempting to log out'); // Log start of logout
 
-      // Send logout request to backend
-      const response = await api.post('/auth/logout');
+      const topics = JSON.parse(localStorage.getItem('topics') || '[]');
+
+      // Send logout request to backend with topics
+      const response = await api.post('/auth/logout', { topics });
       console.log('Backend logout successful:', response); // Log backend success response
 
       // Perform local logout actions to clear local storage and auth state
@@ -58,8 +62,14 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className={styles.navbar}>
-      <h1 className={styles.title}>plato</h1>
-      <div className={styles.navLinks}>
+      <div className={styles.title}>plato</div>
+      
+      <div className={styles.syllabus}>
+        <Syllabus />
+      </div>
+
+      <div className={styles.navLinks} >
+     
       <div className={styles.feedbackSection}>
           <span className={styles.feedbackText}>Have Feedback?</span>
           <button 

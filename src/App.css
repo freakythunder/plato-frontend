@@ -118,3 +118,7 @@ textarea:focus {
     padding: 15px;
   }
 }
+
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";

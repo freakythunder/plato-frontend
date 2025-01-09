@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 
 
 const ResizableContainer: React.FC = () => {
-  const [leftWidth, setLeftWidth] = useState(45);
+  const [leftWidth, setLeftWidth] = useState(50);
   const [code, setCode] = useState<string>('');
   const containerRef = useRef<HTMLDivElement>(null);
   const isResizing = useRef(false);
