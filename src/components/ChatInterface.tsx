@@ -5,16 +5,16 @@ import { sendMessage, getPastConversations, Message } from '../services/chatServ
 import FormattedAIResponse from './FormattedAiResponse';
 import { useAuth } from '../context/AuthContext';
 import Chat from './Chat'; // Import the Chat component
-
-
+import { useProgress } from '../context/AppContext';
+import useLocalStorage from '../services/localHook';
 interface ChatInterfaceProps {
   code: string; // Function to get the current code from IDE
-  
+
 }
 
 
 export interface ChatInterfaceRef {
-  clearCode: () => void; 
+  clearCode: () => void;
 }
 
 
@@ -30,15 +30,15 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
   const { setShouldClearCode } = useAuth();
 
 
+  const { setHasClickedNextButton } = useProgress();
+
+
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   }, []);
 
-  useEffect(() => {
-    loadPastConversationsAndWelcomeMessage();
-  }, []);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -46,50 +46,50 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
     }
   }, [messages]);
 
+  const currentSubtopic = useLocalStorage('currentSubtopic');
+  console.log("from chatinterface : ", currentSubtopic);
 
+  useEffect(() => {
+    console.log('useEffect triggered:', currentSubtopic);
+    if (currentSubtopic) {
+      setMessages([]);
+      loadPastConversations();
+    }
+  }, [currentSubtopic]);
 
-  const loadPastConversationsAndWelcomeMessage = async () => {
+  const loadPastConversations = async () => {
     try {
+      
+
+      // Clear messages state before fetching new messages
+      setMessages([]);
+
       const response = await getPastConversations();
 
-      let chats: Message[] = [];
       if (response.success) {
+        let chats: Message[] = [];
 
         if (Array.isArray(response.data)) {
           chats = response.data;
-        }
-        else if (response.data && 'chats' in response.data) {
+        } else if (response.data && 'chats' in response.data) {
           chats = (response.data as { chats?: Message[] }).chats || [];
         }
 
+        // Validate and sort the chats
         const validatedChats = chats.map(chat => ({
           _id: chat._id || Date.now().toString(),
           user_id: chat.user_id || chat.userId || '',
           userMessage: chat.userMessage || '',
           aiResponse: chat.aiResponse || '',
-          timestamp: chat.timestamp || new Date().toISOString()
+          timestamp: chat.timestamp || new Date().toISOString(),
         }));
 
         const sortedChats = validatedChats.sort((a, b) =>
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
         );
 
+        // Update the messages state with the new chats
         setMessages(sortedChats);
-
-        if (welcomeMessage) {
-          const welcomeMsg: Message = {
-            _id: Date.now().toString(),
-            user_id: 'AI',
-            userMessage: '',
-            aiResponse: welcomeMessage,
-            timestamp: new Date().toISOString()
-          };
-
-          // Add welcome message and clear it from context
-          setMessages(prev => [...prev, welcomeMsg]);
-          clearWelcomeMessage();
-        }
-
 
       } else {
         console.error('Invalid response format:', response);
@@ -100,6 +100,9 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
       setError('Failed to load past conversations');
     }
   };
+
+
+
   const handleSendMessage = async (message: string) => {
     if (!message.trim() || isLoading) return;
 
@@ -122,17 +125,16 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
       let backendMessage;
 
       // Check if the message is "Let's move on to the next topic!"
-      if (message === "Let's move on to the next sub-topic!" || message === "I want to practice another example") {
-        backendMessage = message; // Send the message as is
-      } else {
-        // Append the code only for backend processing for other messages
+      if (message === "My code is not working.") {
         if (!code.trim()) {
           // If code is empty, send the message directly
           backendMessage = message; // Send the message as is
-      } else {
+        } else {
           // Append the code only for backend processing for other messages
           backendMessage = `${message}. Here is my code: ${code}`;
-      }
+        }
+      } else {
+        backendMessage = message; // Don't append code for other messages
       }
 
 
@@ -166,52 +168,94 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
     handleSendMessage(message);
   };
 
- 
+
+  const handlePrevTopic = async () => {
+    console.log("prev topic clicked");
+    const currentSubtopic = localStorage.getItem('currentSubtopic');
+    const topics = JSON.parse(localStorage.getItem('topics'));
+    const currentTopic = topics.find((t) => t.subtopics.find((st) => st.name === currentSubtopic));
+    const currentSubtopicIndex = currentTopic.subtopics.indexOf(currentTopic.subtopics.find((st) => st.name === currentSubtopic));
+    if (currentSubtopicIndex > 0) {
+      const previousSubtopic = currentTopic.subtopics[currentSubtopicIndex - 1];
+      if (previousSubtopic.completed) {
+        setShouldClearCode(true);
+        setMessages([]);
+        localStorage.setItem('currentSubtopic', previousSubtopic.name);
+      }
+    }
+    else {
+      const currentTopicindex = topics.indexOf(currentTopic);
+      const prevtopicIndex = currentTopicindex - 1;
+      const previousSubtopic = topics[prevtopicIndex].subtopics[topics[prevtopicIndex].subtopics.length - 1];
+      if (previousSubtopic.completed) {
+        setShouldClearCode(true);
+        setMessages([]);
+        localStorage.setItem('currentSubtopic', previousSubtopic.name);
+      }
+    }
+  };
+
+  const handleNextTopic = async () => {
+    const currentSubtopic = localStorage.getItem('currentSubtopic');
+    const topics = JSON.parse(localStorage.getItem('topics'));
+    const currentTopic = topics.find((t) => t.subtopics.find((st) => st.name === currentSubtopic));
+    const currentSubtopicIndex = currentTopic.subtopics.indexOf(currentTopic.subtopics.find((st) => st.name === currentSubtopic));
+
+    if (currentTopic.subtopics[currentSubtopicIndex].completed) {
+      // Find the next subtopic
+      if (currentSubtopicIndex < currentTopic.subtopics.length - 1) {
+        // Next subtopic is within the same topic
+        const nextSubtopic = currentTopic.subtopics[currentSubtopicIndex + 1];
+        setMessages([]);
+        localStorage.setItem('currentSubtopic', nextSubtopic.name);
+        setShouldClearCode(true);
+      } else {
+        // Current subtopic is the last one in the topic, move to next topic
+        const nextTopicIndex = topics.indexOf(currentTopic) + 1;
+        if (nextTopicIndex < topics.length) {
+          const nextTopic = topics[nextTopicIndex];
+          const nextSubtopic = nextTopic.subtopics[0]; // First subtopic of the next topic    
+          setMessages([]);
+          localStorage.setItem('currentSubtopic', nextSubtopic.name);
+          setShouldClearCode(true);
+        }
+      }
+    }
+    else {
+      setHasClickedNextButton(true);
+    }
+  };
 
 
   const handleButtonClick = async (buttonText: string) => {
-    if (buttonText === "Let's move on to the next sub-topic!" || buttonText === "I want to practice another example") {
-      setShouldClearCode(true); // Set the variable to true when the button is clicked
-      console.log("set to true from chat");
-
-    }
     handleSendMessage(buttonText); // Send the message with code
   };
+
+
   // Modify the getAIResponseMessage to handle string responses
   const getAIResponseMessage = (response: Message['aiResponse']): {
-    user_id?: string;
-    userMessage?: string;
     aiResponse: string;
     timestamp: string;
-  } => {
-    // If response is already a string, return it directly
+} => {
+    let aiResponse: string;
+    let timestamp: string;
+
     if (typeof response === 'string') {
-      return {
-        user_id: 'AI',
-        userMessage: '',
-        aiResponse: response,
-        timestamp: new Date().toISOString()
-      };
+        aiResponse = response;
+        timestamp = new Date().toISOString();
+    } else if (typeof response === 'object') {
+        aiResponse = response.aiResponse || '';
+        timestamp = response.timestamp || new Date().toISOString();
+    } else {
+        aiResponse = '';
+        timestamp = new Date().toISOString();
     }
 
-    // If it's an object, try to extract aiResponse or userMessage
-    if (typeof response === 'object') {
-      return {
-        user_id: response.user_id || 'AI',
-        userMessage: response.userMessage || '',
-        aiResponse: response.aiResponse || '',
-        timestamp: response.timestamp || new Date().toISOString()
-      };
-    }
-
-    // Fallback to empty string
     return {
-      user_id: 'AI',
-      userMessage: '',
-      aiResponse: '',
-      timestamp: new Date().toISOString()
+        aiResponse,
+        timestamp,
     };
-  };
+};
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -222,6 +266,7 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
       minute: '2-digit'
     });
   };
+
 
 
   return (
@@ -236,9 +281,9 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
               </div>
             )}
             {msg.aiResponse && (
-              <div className={styles.aiMessage}>
+              <div>
                 <FormattedAIResponse response={getAIResponseMessage(msg.aiResponse)} />
-                <div className={styles.timestamp}>{formatTimestamp(msg.timestamp)}</div>
+                
               </div>
             )}
           </div>
@@ -248,23 +293,27 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
       <div className={styles.buttonSection}>
         {/* First Row of Buttons */}
         <div className={styles.buttonRow}>
-          <button className={`${styles.customButton} ${styles.button1}`} onClick={() => handleButtonClick("I am getting an error.")}>
-            I am getting an error.
+          <button className={`${styles.customButton} ${styles.button1}`} onClick={() => handleButtonClick("My code is not working.")}>
+            My code is not working.
           </button>
           <button className={`${styles.customButton} ${styles.button2}`} onClick={() => handleButtonClick("I want to practice another example")}>
             I want to practice another example
           </button>
-        </div>
-        <div className={styles.buttonRow}>
-          <button className={`${styles.customButton} ${styles.button3}`} onClick={() => handleButtonClick("Let's move on to the next sub-topic!")}>
-            Let's move on to the next sub-topic!
-          </button>
-          <button className={`${styles.customButton} ${styles.button4}`} onClick={() => handleButtonClick("I need hint for this challenge")}>
-            I need hint for this challenge
+          <button className={`${styles.customButton} ${styles.button3}`} onClick={() => handleButtonClick("Need a hint 💡")}>
+            Need a hint 💡
           </button>
         </div>
       </div>
-      <Chat onSend={handleSend} />
+      <div className={styles.chatComponent}><Chat onSend={handleSend} /></div>
+      <div className={styles.navbuttonrow}>
+        <button className={`${styles.navButton} ${styles.button1}`} onClick={handlePrevTopic}>
+          Prev
+        </button>
+        <button className={`${styles.navButton} ${styles.button2}`} onClick={handleNextTopic}>
+          Next
+        </button>
+      </div>
+
       {error && <div className={styles.errorMessage}>{error}</div>}
     </div>
   );

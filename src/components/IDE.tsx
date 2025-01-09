@@ -3,7 +3,7 @@ import Editor from '@monaco-editor/react';
 import styles from '../Styles/IDE.module.css';
 import { executeCode } from '../services/codeService';
 import { useAuth } from '../context/AuthContext';
-
+import { useProgress } from '../context/AppContext';
 interface IDEProps {
   height: number;
   onRun: (output: string) => void;
@@ -28,6 +28,8 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
   const editorRef = useRef<any>(null);
   const hasRunButtonClicked = useRef<boolean>(false);
   const runButtonRef = useRef<HTMLButtonElement | null>(null);
+  const { setHasRunCode } = useProgress();
+
 
   useImperativeHandle(ref, () => ({
     getCode: () => code,
@@ -70,7 +72,11 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
     try {
       const result = await executeCode(code);
       const output = result.success ? result.data.output : 'Error while executing code.';
+      if(result.data.executionSuccess){
+        setHasRunCode(true);
+      }
       onRun(output); // Trigger output update immediately
+      
     } catch {
       onRun('Error while executing code.');
     } finally {

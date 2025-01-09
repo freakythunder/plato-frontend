@@ -44,7 +44,14 @@ export const sendMessage = async (message: string): Promise<SingleMessageRespons
 };
 export const getPastConversations = async (): Promise<PastConversationsResponse> => {
   try {
-    const response = await api.get('/chat/past');
+    const subtopicId = localStorage.getItem('currentSubtopic');
+    
+    const response = await api.get('/chat/past', {
+      params: {
+        subtopicId,
+
+      },
+    });
     
     // Add logging to verify the exact response structure
     console.log('Raw API response:', response);

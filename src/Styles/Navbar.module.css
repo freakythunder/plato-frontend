@@ -17,10 +17,10 @@
 }
 
 .navLinks {
-    display: flex;
+    display: flex; /* Use flexbox for horizontal alignment */
     gap: 20px;
-    align-items: center;
-}
+    align-items: center; /* Align items vertically in center */
+  }
 
 .userMenu {
     position: relative; /* Required for dropdown positioning */
@@ -68,19 +68,6 @@
     background-color: #c0392b; /* Darker shade on hover */
 }
 
-.loginButton {
-    background-color: #3498db;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.loginButton:hover {
-    background-color: #2980b9; /* Darker shade on hover */
-}
 
 .feedbackSection {
     display: flex;
@@ -114,3 +101,10 @@
     background-color: #45a049; /* Darker green on hover */
     transform: scale(1.05); /* Slightly enlarge button on hover */
 }
+.syllabus {
+    display: flex;
+    overflow: hidden; 
+  }
+  
+
+

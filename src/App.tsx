@@ -5,9 +5,10 @@ import HomePage from './components/HomePage';
 import ResizableContainer from './components/ResizableContainer';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
+import Syllabus from './components/syllabus/syllabus';
+import { ProgressProvider } from './context/AppContext';
 
 const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
-  console.log("Test");
   const isAuthenticated = !!localStorage.getItem('token');
   return isAuthenticated ? children : <Navigate to="/" />;
 };
@@ -15,13 +16,14 @@ const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({ children }) 
 const App: React.FC = () => {
   const location = useLocation();
   return (
+    <ProgressProvider>
     <AuthProvider>
       <div className="appContainer">
         {/* Render Navbar only if the current path is not the home page */}
         {location.pathname !== '/' && <Navbar />}
         
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<HomePage />}  />
           <Route
             path="/main"
             element={
@@ -32,9 +34,11 @@ const App: React.FC = () => {
               </PrivateRoute>
             }
           />
+          <Route path="syllabus" element={<Syllabus />}  />
         </Routes>
       </div>
     </AuthProvider>
+    </ProgressProvider>
   );
 };
 

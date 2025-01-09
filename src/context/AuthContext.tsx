@@ -5,12 +5,14 @@ interface AuthContextType {
   username: string | null;
   setUsername: (username: string | null) => void;
   isAuthenticated: boolean;
-  login: (username: string, token: string, welcomeMsg?: string) => void;
+  login: (username: string, token: string, welcomeMsg?: string, topics?: any) => void;
   localLogout: () => void;
   welcomeMessage: string | null;
   clearWelcomeMessage: () => void;
   shouldClearCode: boolean; // New variable
   setShouldClearCode: (value: boolean) => void; // New function
+  topics: any;
+  setTopics: (topics: any) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,23 +22,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
   const [shouldClearCode, setShouldClearCode] = useState<boolean>(false); // Initialize the new variable
+  
+  const [topics, setTopics] = useState<any>(() => {
+    const storedTopics = localStorage.getItem('topics');
+    return storedTopics ? JSON.parse(storedTopics) : null;
+  });
 
-
-  const login = (username: string, token: string , message :string) => {
+   const login = (username: string, token: string, message: string) => {
+    
+    
     localStorage.setItem('username', username);
     localStorage.setItem('token', token);
-    const trimmedMessage = message.trim().toLowerCase();
-    console.log('Trimmed message:', trimmedMessage); // Log the trimmed message
     
+    const trimmedMessage = message.trim().toLowerCase();
+   
+
     if (trimmedMessage === 'user  registered') {
       localStorage.setItem('IsNewUser ', 'true'); // Store new user status
-      console.log('Setting IsNewUser  to true'); // Log the action
     } else {
       localStorage.setItem('IsNewUser ', 'false'); // Store returning user status
-      console.log('Setting IsNewUser  to false'); // Log the action
+      
     }
     setUsername(username);
     setIsAuthenticated(true);
+    
   };
 
   const localLogout = () => {
@@ -49,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUsername(null);
     setWelcomeMessage(null);
     setIsAuthenticated(false);
+    setTopics(null);
   };
 
   const clearWelcomeMessage = () => {
@@ -56,11 +66,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setWelcomeMessage(null);
   };
 
+  
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
     const token = localStorage.getItem('token');
     const storedWelcomeMessage = localStorage.getItem('welcomeMessage');
+    const storedTopics = localStorage.getItem('topics');
     
+
     if (storedUsername && token) {
       setUsername(storedUsername);
       setWelcomeMessage(storedWelcomeMessage);
@@ -69,16 +82,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ 
-      username, 
-      setUsername, 
-      isAuthenticated, 
-      login, 
+    <AuthContext.Provider value={{
+      username,
+      setUsername,
+      isAuthenticated,
+      login,
       localLogout,
       welcomeMessage,
       clearWelcomeMessage,
       shouldClearCode,
       setShouldClearCode,
+      topics,
+      setTopics
     }}>
       {children}
     </AuthContext.Provider>

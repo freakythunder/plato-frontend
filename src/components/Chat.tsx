@@ -20,7 +20,7 @@ const Chat: React.FC<ChatProps> = ({ onSend }) => {
             <div className={styles.chatContainer}>
                 <input
                     type="text"
-                    placeholder="Ask me your doubts..."
+                    placeholder="Ask me your anything..."
                     className={styles.input}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}

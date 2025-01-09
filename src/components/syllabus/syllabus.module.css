@@ -1,0 +1,130 @@
+/* Syllabus container */
+.syllabus-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* Navigation container with arrows and topics in a single row */
+  .navigation-container {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between arrows and topics */
+  }
+  
+  /* Topics row */
+  .topics-row {
+    display: flex; 
+    align-items: center;
+    gap: 15px; /* Space between topic names */
+  }
+  
+  /* Topic header */
+  .topic-header {
+    display: inline-flex; 
+    align-items: center;
+    gap: 10px; /* Space between name and icon */
+    font-size: 16px;
+    font-weight: 600;
+    font-family: 'sometype mono';
+    cursor: pointer;
+    position: relative; /* Ensures dropdown is positioned relative to this */
+  }
+  
+  /* Dropdown popup styling */
+  .dropdown-popup {
+    position: absolute; 
+    top: 100%; 
+    left: 0; 
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 15px 20px;
+    z-index: 1000; 
+    min-width: 220px; /* Slightly wider */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Space between subtopics */
+    opacity: 1;
+    transition: opacity 0.7s ease-in-out;
+  }
+
+  .dropdown-popup.show {
+    opacity: 1;
+  }
+  
+  /* Subtopic styling */
+  .subtopic {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between checkbox and text */
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .subtopic:hover {
+    background-color: #f9f9f9; /* Subtle hover effect */
+  }
+  
+  /* Custom circular checkbox */
+  .subtopic input[type="checkbox"] {
+    appearance: none; /* Hide default checkbox */
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-radius: 50%; /* Circular shape */
+    cursor: pointer;
+    outline: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .subtopic input[type="checkbox"]:checked {
+    border-color: #28a745; /* Green border */
+    background-color: #28a745; /* Green fill */
+  }
+  
+  .subtopic input[type="checkbox"]:checked::before {
+    content: "✔"; /* Green tick */
+    font-size: 14px;
+    color: white;
+    line-height: 1;
+  }
+  
+  /* Subtopic text */
+  .subtopic span {
+    font-size: 14px;
+    color: #333;
+  }
+  
+  /* Icon */
+  .icon {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    color: #666;
+  }
+  
+  /* Navigation arrows */
+  .arrow {
+    background-color: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #555;
+    padding: 5px;
+    transition: color 0.3s;
+  }
+  
+  .arrow:disabled {
+    cursor: not-allowed;
+    color: #ccc;
+  }
+  
+  .arrow:hover:not(:disabled) {
+    color: #000;
+  }

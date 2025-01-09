@@ -13,6 +13,8 @@ const LoadingScreen: React.FC<{ message: string }> = ({ message }) => (
   </div>
 );
 
+
+
 const HomePage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,12 +45,15 @@ const HomePage: React.FC = () => {
         });
 
         clearInterval(interval);
-
-        if (response.data?.data) {
+        
+        if (response.data?.success) {
           const token = response.data.data.token;
           const message = response.data.message;
-
+          const topics = response.data.data.topics;
+          console.log("saving topics from login to local storage : ",topics);
+          localStorage.setItem('topics', JSON.stringify(topics));
           login(user?.email, token, message); // Save session
+
           navigate("/main"); // Redirect on success
         } else {
           throw new Error("Invalid response from server");
