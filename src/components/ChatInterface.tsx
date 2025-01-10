@@ -41,7 +41,7 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
 
 
   useEffect(() => {
-    if (messages.length > 0) {
+    if (messages.length > 1) {
       scrollToBottom();
     }
   }, [messages]);
