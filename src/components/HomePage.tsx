@@ -110,6 +110,7 @@ const HomePage: React.FC = () => {
                 href="https://calendly.com/adityaramteke-1357/30min"
                 target="_blank"
                 rel="noreferrer"
+                className={styles.linkText}
               >
                 here
               </a>

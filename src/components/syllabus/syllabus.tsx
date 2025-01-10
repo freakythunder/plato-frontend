@@ -248,7 +248,7 @@ const Syllabus: React.FC = () => {
           <div className={styles.subtopics}>
             {topics.find((topic) => topic.id === expandedTopicId)?.subtopics.map((subtopic, index) => (
               <div key={subtopic.id} className={styles.subtopic} onClick={() => handleSubtopicClick(subtopic)}>
-                <input type="checkbox" checked={subtopic.completed} style={{ backgroundColor: subtopic.completed ? 'green' : 'transparent' }} />
+                <input type="checkbox" checked={subtopic.completed} style={{ backgroundColor: subtopic.completed ? 'green' : 'transparent' }}/>
                 <span style={{
                   color: subtopic.completed ? 'green' :
                     (index > 0 && topics.find((topic) => topic.id === expandedTopicId)?.subtopics[index - 1].completed) ||

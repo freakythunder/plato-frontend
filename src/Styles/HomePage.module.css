@@ -158,3 +158,10 @@ body {
     opacity: 1;
   }
 }
+
+
+.linkText {
+   /* or any other color you want */
+  text-decoration: underline;
+  font-weight: bold;
+}
