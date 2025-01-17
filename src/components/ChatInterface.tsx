@@ -26,7 +26,7 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { welcomeMessage, clearWelcomeMessage } = useAuth();
   const token = localStorage.getItem('token');
-  const username = token ? JSON.parse(atob(token.split('.')[1])).username : null;
+  const username = localStorage.getItem('username');
   const { setShouldClearCode } = useAuth();
 
 
