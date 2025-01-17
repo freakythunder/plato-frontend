@@ -7,7 +7,7 @@ import { AuthProvider } from './context/AuthContext';
 import './App.css';
 import Syllabus from './components/syllabus/syllabus';
 import { ProgressProvider } from './context/AppContext';
-
+import 'firebaseui/dist/firebaseui.css';
 const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem('token');
   return isAuthenticated ? children : <Navigate to="/" />;

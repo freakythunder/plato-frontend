@@ -3,15 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import styles from '../Styles/Navbar.module.css';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { useAuth0 } from "@auth0/auth0-react";
+import { getAuth, signOut } from "firebase/auth";
 import Syllabus from './syllabus/syllabus';
 
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { username, isAuthenticated, localLogout } = useAuth();
-  const { logout } = useAuth0();
+  const { username, isAuthenticated, localLogout, imageurl } = useAuth();
+  const auth = getAuth();
 
   const handleLogout = async () => {
     try {
@@ -27,10 +27,10 @@ const Navbar: React.FC = () => {
       localLogout();
       setIsMenuOpen(false);
 
-      // Temporary delay before Auth0 logout to ensure backend completion
-      setTimeout(() => {
+      setTimeout(async () => {
         console.log('Executing Auth0 logout'); // Log before Auth0 logout
-        logout({ logoutParams: { returnTo: window.location.origin } });
+        await signOut(auth);
+        navigate('/');
       }, 1000); // Half a second delay to ensure backend completion
 
     } catch (error) {
@@ -46,11 +46,9 @@ const Navbar: React.FC = () => {
       localLogout();
       setIsMenuOpen(false);
 
-      // Trigger Auth0 logout in case backend logout fails
-      setTimeout(() => {
-        console.log('Executing Auth0 logout after backend error'); // Log in case of backend failure
-        logout({ logoutParams: { returnTo: window.location.origin } });
-      }, 500);
+      await signOut(auth);
+      navigate('/');
+
     }
   };
 
@@ -63,17 +61,17 @@ const Navbar: React.FC = () => {
   return (
     <nav className={styles.navbar}>
       <div className={styles.title}>plato</div>
-      
+
       <div className={styles.syllabus}>
         <Syllabus />
       </div>
 
       <div className={styles.navLinks} >
-     
-      <div className={styles.feedbackSection}>
+
+        <div className={styles.feedbackSection}>
           <span className={styles.feedbackText}>Have Feedback?</span>
-          <button 
-            className={styles.feedbackButton} 
+          <button
+            className={styles.feedbackButton}
             onClick={() => window.open(feedbackLink, '_blank')} // Open link in a new tab
           >
             Talk to Founders
@@ -82,7 +80,13 @@ const Navbar: React.FC = () => {
         {isAuthenticated ? (
           <div className={styles.userMenu}>
             <button onClick={toggleMenu} className={styles.userButton}>
-              👤
+
+              <img src={imageurl} alt="User Profile Picture" style={{
+                width: '40px', // adjust the width to your desired size
+                height: '40px', // adjust the height to your desired size
+                borderRadius: '50%', // make the image circular
+                objectFit: 'cover', // ensure the image is scaled to fit within the dimensions
+              }} />
             </button>
             {isMenuOpen && (
               <div className={styles.dropdown}>
