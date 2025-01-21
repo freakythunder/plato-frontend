@@ -7,6 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import Chat from './Chat'; // Import the Chat component
 import { useProgress } from '../context/AppContext';
 import useLocalStorage from '../services/localHook';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked'; // Ensure these are installed via npm or yarn
 interface ChatInterfaceProps {
   code: string; // Function to get the current code from IDE
 
@@ -24,8 +26,8 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { welcomeMessage, clearWelcomeMessage } = useAuth();
-  const token = localStorage.getItem('token');
+
+
   const username = localStorage.getItem('username');
   const { setShouldClearCode } = useAuth();
 
@@ -47,10 +49,10 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
   }, [messages]);
 
   const currentSubtopic = useLocalStorage('currentSubtopic');
-  console.log("from chatinterface : ", currentSubtopic);
+
 
   useEffect(() => {
-    console.log('useEffect triggered:', currentSubtopic);
+
     if (currentSubtopic) {
       setMessages([]);
       loadPastConversations();
@@ -59,7 +61,7 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
 
   const loadPastConversations = async () => {
     try {
-      
+
 
       // Clear messages state before fetching new messages
       setMessages([]);
@@ -103,66 +105,95 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
 
 
 
-  const handleSendMessage = async (message: string) => {
-    if (!message.trim() || isLoading) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    // Store only the clean message in the userMessage
-    const newUserMessage: Message = {
-      _id: Date.now().toString(),
-      user_id: username || '',
-      userMessage: message, // This remains "I need hint for this challenge"
-      aiResponse: "AI is thinking...",
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages(prev => [...prev, newUserMessage]);
-
-    try {
-      // Append the code only for backend processing
-      let backendMessage;
-
-      // Check if the message is "Let's move on to the next topic!"
-      if (message === "My code is not working.") {
-        if (!code.trim()) {
-          // If code is empty, send the message directly
-          backendMessage = message; // Send the message as is
-        } else {
-          // Append the code only for backend processing for other messages
-          backendMessage = `${message}. Here is my code: ${code}`;
-        }
-      } else {
-        backendMessage = message; // Don't append code for other messages
-      }
 
 
-      const response = await sendMessage(backendMessage);
-      if (response.success) {
-        setMessages(prev =>
-          prev.map(msg =>
-            msg._id === newUserMessage._id
-              ? {
-                ...msg,
-                aiResponse: response.data.aiResponse || "No response",
-                timestamp: new Date().toISOString(),
-              }
-              : msg
-          )
-        );
+const handleSendMessage = async (message: string) => {
+  if (!message.trim() || isLoading) return;
 
+  setIsLoading(true);
+  setError(null);
 
-      } else {
-        setError(response.message || "Failed to send message");
-      }
-    } catch (err) {
-      console.error("Error sending message:", err);
-      setError("Failed to send message");
-    } finally {
-      setIsLoading(false);
-    }
+  const newUserMessage: Message = {
+    _id: Date.now().toString(),
+    user_id: username || '',
+    userMessage: message,
+    aiResponse: "",
+    timestamp: new Date().toISOString(),
   };
+
+  setMessages(prev => [...prev, newUserMessage]);
+
+  try {
+    let backendMessage = message;
+
+    if (message === "My code is not working." && code.trim()) {
+      backendMessage = `${message}. Here is my code: ${code}`;
+    }
+
+    const response = await fetch("http://localhost:5000/chat/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ message: backendMessage }),
+    });
+
+    if (!response.body) throw new Error("No response body");
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let fullResponse = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      buffer += chunk;
+      fullResponse += chunk;
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === newUserMessage._id
+            ? { ...msg, aiResponse: fullResponse }
+            : msg
+        )
+      );
+
+      // Scroll to bottom after each chunk update
+      scrollToBottom();
+    }
+
+    // Save full response on completion
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg._id === newUserMessage._id
+          ? { ...msg, aiResponse: fullResponse.trim() }
+          : msg
+      )
+    );
+  } catch (err) {
+    console.error("Error sending message:", err);
+    setError("Failed to send message");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// Format the message with markdown support and sanitization
+const formatMessage = (message: string): string => {
+  // Ensure `marked.parse` returns a string
+  const rawHTML = marked.parse(message); // Confirm `marked.parse` is synchronous in your environment
+  
+  if (typeof rawHTML !== "string") {
+    throw new Error("Expected `marked.parse` to return a string.");
+  }
+
+  return DOMPurify.sanitize(rawHTML); // Sanitize HTML for security
+};
+
 
   const handleSend = (message: string) => {
     handleSendMessage(message);
@@ -236,26 +267,26 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
   const getAIResponseMessage = (response: Message['aiResponse']): {
     aiResponse: string;
     timestamp: string;
-} => {
+  } => {
     let aiResponse: string;
     let timestamp: string;
 
     if (typeof response === 'string') {
-        aiResponse = response;
-        timestamp = new Date().toISOString();
+      aiResponse = response;
+      timestamp = new Date().toISOString();
     } else if (typeof response === 'object') {
-        aiResponse = response.aiResponse || '';
-        timestamp = response.timestamp || new Date().toISOString();
+      aiResponse = response.aiResponse || '';
+      timestamp = response.timestamp || new Date().toISOString();
     } else {
-        aiResponse = '';
-        timestamp = new Date().toISOString();
+      aiResponse = '';
+      timestamp = new Date().toISOString();
     }
 
     return {
-        aiResponse,
-        timestamp,
+      aiResponse,
+      timestamp,
     };
-};
+  };
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -282,8 +313,13 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
             )}
             {msg.aiResponse && (
               <div>
-                <FormattedAIResponse response={getAIResponseMessage(msg.aiResponse)} />
-                
+                 <FormattedAIResponse
+                response={{
+                  aiResponse: msg.aiResponse,
+                  timestamp: msg.timestamp,
+                }}
+              />
+
               </div>
             )}
           </div>
