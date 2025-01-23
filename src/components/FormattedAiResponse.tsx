@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import styles from '../Styles/ChatInterface.module.css';
 import { ComponentPropsWithoutRef } from 'react';
+import MarkdownIt from 'markdown-it';
+
+const mdParser = new MarkdownIt();
 
 interface FormattedAIResponseProps {
   response: {
@@ -19,17 +22,44 @@ interface FormattedAIResponseProps {
 }
 
 const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) => {
-  const extractMarkdownContent = (): string => {
+  const [accumulatedResponse, setAccumulatedResponse] = useState('');
+  const [lastValidMarkdown, setLastValidMarkdown] = useState('');
+
+  useEffect(() => {
     const aiResponse = response.aiResponse;
-    if (typeof aiResponse === 'string') return aiResponse.trim();
-    if (typeof aiResponse === 'object') return (aiResponse.aiResponse || '').trim();
-    return '';
-  };
+    const newResponse = typeof aiResponse === 'string' ? aiResponse : aiResponse.aiResponse || '';
 
-  const markdownContent = extractMarkdownContent();
-  if (!markdownContent) return null;
+    // Append new response to accumulated
+    setAccumulatedResponse(newResponse);
+  }, [response]);
 
-  const formattedTimestamp = new Date(response.timestamp).toLocaleString(); // Format timestamp for readability
+  useEffect(() => {
+    const extractValidMarkdown = (content: string): string => {
+      const lines = content.split('\n'); // Split into lines for granular processing
+      let validContent = '';
+
+      for (const line of lines) {
+        try {
+          const rendered = mdParser.render(line.trim());
+          if (rendered.trim()) {
+            validContent += line + '\n'; // Accumulate valid lines
+          }
+        } catch {
+          // Skip invalid lines
+        }
+      }
+
+      return validContent.trim();
+    };
+
+    const validMarkdown = extractValidMarkdown(accumulatedResponse);
+    if (validMarkdown) {
+      setLastValidMarkdown(validMarkdown); // Update with extracted valid content
+    }
+  }, [accumulatedResponse]);
+
+  if (!lastValidMarkdown) return null;
+  const formattedTimestamp = new Date(response.timestamp).toLocaleString();
 
   return (
     <div className={styles.aiResponseContainer}>
@@ -40,7 +70,7 @@ const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) =
             const match = /language-(\w+)/.exec(className || '');
             return !inline && match ? (
               <SyntaxHighlighter
-                style={vscDarkPlus as any} // Black-themed code block
+                style={vscDarkPlus as any}
                 language={match[1]}
                 className={styles.codeBlock}
                 PreTag="div"
@@ -62,8 +92,8 @@ const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) =
             const appliedClass = isChallenge
               ? styles.challengePrompt
               : isExplanation
-              ? styles.explanationBox
-              : styles.aiResponseText;
+                ? styles.explanationBox
+                : styles.aiResponseText;
 
             return (
               <p className={appliedClass} {...props}>
@@ -90,9 +120,9 @@ const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) =
           ),
         }}
       >
-        {markdownContent}
+        {lastValidMarkdown}
       </ReactMarkdown>
-      <div className={styles.timestamp}>{formattedTimestamp}</div> {/* Timestamp at the bottom */}
+      <div className={styles.timestamp}>{formattedTimestamp}</div>
     </div>
   );
 };
