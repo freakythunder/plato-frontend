@@ -3,7 +3,8 @@ import api from './api';
 
 export const executeCode = async (code: string) => {
   try {
-    const response = await api.post('/code/execute', { code });
+    const language = localStorage.getItem('language');
+    const response = await api.post('/code/execute', { code, language });
     return response.data;
   } catch (error) {
     console.error('Error executing code:', error);
