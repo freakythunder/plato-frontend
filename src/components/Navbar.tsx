@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { getAuth, signOut } from "firebase/auth";
 import Syllabus from './syllabus/syllabus';
+import { useLocation } from 'react-router-dom';
+import { json } from 'express';
 
 
 const Navbar: React.FC = () => {
@@ -12,15 +14,29 @@ const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { username, isAuthenticated, localLogout, imageurl } = useAuth();
   const auth = getAuth();
-
+  const location = useLocation();
   const handleLogout = async () => {
     try {
       console.log('Attempting to log out'); // Log start of logout
 
-      const topics = JSON.parse(localStorage.getItem('topics') || '[]');
-
+      const alltopics = JSON.parse(localStorage.getItem('allTopics'));
+      const topics = JSON.parse(localStorage.getItem('topics'));
+      
+      if (alltopics && topics) {
+        const language = localStorage.getItem('language');
+        const languageTopic = alltopics.find(topic => topic.language === language);
+      
+        if (languageTopic) {
+          languageTopic.topics = topics;
+        } else {
+          console.error('languageTopic is undefined');
+        }
+      } else {
+        console.error('alltopics or topics is undefined');
+      }
+       
       // Send logout request to backend with topics
-      const response = await api.post('/auth/logout', { topics });
+      const response = await api.post('/auth/logout', { alltopics });
       console.log('Backend logout successful:', response); // Log backend success response
 
       // Perform local logout actions to clear local storage and auth state
@@ -63,7 +79,7 @@ const Navbar: React.FC = () => {
       <div className={styles.title}>plato</div>
 
       <div className={styles.syllabus}>
-        <Syllabus />
+        {location.pathname !== '/home' && <Syllabus />}
       </div>
 
       <div className={styles.navLinks} >

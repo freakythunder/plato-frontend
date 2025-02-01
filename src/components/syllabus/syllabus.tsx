@@ -144,9 +144,25 @@ const Syllabus: React.FC = () => {
           }
         }
       }
+      updateAllTopicsInLocalStorage(topics);
     }
   };
-
+  const updateAllTopicsInLocalStorage = (updatedTopics: Topic[]) => {
+    const storedAllTopics = localStorage.getItem('allTopics');
+    if (storedAllTopics) {
+      const allTopics = JSON.parse(storedAllTopics);
+      const currentLanguage = localStorage.getItem('language');
+      if (currentLanguage) {
+        const updatedAllTopics = allTopics.map((topic) => {
+          if (topic.language === currentLanguage) {
+            return { ...topic, topics: updatedTopics };
+          }
+          return topic;
+        });
+        localStorage.setItem('allTopics', JSON.stringify(updatedAllTopics));
+      }
+    }
+  };
   const toggleTopic = (id: number) => {
     if (expandedTopicId === id) {
       setExpandedTopicId(null);

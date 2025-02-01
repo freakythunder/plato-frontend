@@ -140,7 +140,7 @@ const handleSendMessage = async (message: string) => {
     });
 
     if (!response.body) throw new Error("No response body");
-
+    console.log("Response body:", response.body);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";

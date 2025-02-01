@@ -8,6 +8,7 @@ import './App.css';
 import Syllabus from './components/syllabus/syllabus';
 import { ProgressProvider } from './context/AppContext';
 import 'firebaseui/dist/firebaseui.css';
+import Language from './components/langauge/language';
 const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem('token');
   return isAuthenticated ? children : <Navigate to="/" />;
@@ -34,7 +35,17 @@ const App: React.FC = () => {
               </PrivateRoute>
             }
           />
-          <Route path="syllabus" element={<Syllabus />}  />
+          <Route
+            path="/home"
+            element={
+              <PrivateRoute>
+                
+                  <Language/>
+                
+              </PrivateRoute>
+            }
+          />
+          
         </Routes>
       </div>
     </AuthProvider>

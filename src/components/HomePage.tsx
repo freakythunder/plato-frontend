@@ -71,10 +71,10 @@ const HomePage: React.FC = () => {
       if (response.data?.success) {
         const sessionToken = idToken;
         const message = response.data.message;
-        const topics = response.data.data.topics; // Optional
-        localStorage.setItem('topics', JSON.stringify(topics));
+        const alltopics = response.data.data.topics;
+        localStorage.setItem("allTopics", JSON.stringify(alltopics));
         login(user.displayName, sessionToken, message);
-        navigate("/main");
+        navigate("/home");
       } else {
         throw new Error("Invalid response from server");
       }

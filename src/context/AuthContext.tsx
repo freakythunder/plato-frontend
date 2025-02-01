@@ -11,8 +11,6 @@ interface AuthContextType {
   clearWelcomeMessage: () => void;
   shouldClearCode: boolean; // New variable
   setShouldClearCode: (value: boolean) => void; // New function
-  topics: any;
-  setTopics: (topics: any) => void;
   currentUser: any;
   imageurl : string;
 }
@@ -41,10 +39,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
   
-  const [topics, setTopics] = useState<any>(() => {
-    const storedTopics = localStorage.getItem('topics');
-    return storedTopics ? JSON.parse(storedTopics) : null;
-  });
 
    const login = (username: string, token: string, message: string) => {
     
@@ -55,10 +49,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const trimmedMessage = message.trim().toLowerCase();
    
 
-    if (trimmedMessage === 'user  registered') {
-      localStorage.setItem('IsNewUser ', 'true'); // Store new user status
+    if (trimmedMessage === 'user registered') {
+      localStorage.setItem('IsNewUser', 'true'); // Store new user status
     } else {
-      localStorage.setItem('IsNewUser ', 'false'); // Store returning user status
+      localStorage.setItem('IsNewUser', 'false'); // Store returning user status
       
     }
     setUsername(username);
@@ -76,7 +70,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUsername(null);
     setWelcomeMessage(null);
     setIsAuthenticated(false);
-    setTopics(null);
   };
 
   const clearWelcomeMessage = () => {
@@ -108,8 +101,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearWelcomeMessage,
       shouldClearCode,
       setShouldClearCode,
-      topics,
-      setTopics,
       currentUser,
       imageurl
     }}>
