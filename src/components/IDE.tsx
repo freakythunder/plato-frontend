@@ -29,7 +29,7 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
   const hasRunButtonClicked = useRef<boolean>(false);
   const runButtonRef = useRef<HTMLButtonElement | null>(null);
   const { setHasRunCode } = useProgress();
-
+  const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
 
   useImperativeHandle(ref, () => ({
     getCode: () => code,
@@ -69,20 +69,35 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
     if (isPlaceholderActive) return;
     hasRunButtonClicked.current = true; // Prevent running placeholder text
     setIsLoading(true);
+    const outputBuffer: string[] = [];
+    
     try {
-      const result = await executeCode(code);
-      const output = result.success ? result.data.output : 'Error while executing code.';
+    const result = await executeCode(code || '') as { data: { output: string; executionSuccess: boolean } };
+    // Process final output after completion
+    console.log("out[pput : ",result.data.output);
+    onRun(result.data.output);
+      
       if(result.data.executionSuccess){
         setHasRunCode(true);
       }
-      onRun(output); // Trigger output update immediately
-      
-    } catch {
-      onRun('Error while executing code.');
+    } catch(error) {
+      if (error instanceof Error) {
+        onRun(`Error: ${error.message}`); // Use actual error message
+      } else {
+        onRun('Error: Unknown execution error');
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (wsConnection) {
+        wsConnection.close(1000, 'Component unmount');
+      }
+    };
+  }, [wsConnection]);
 
   const handleClickOutside = (event: MouseEvent) => {
     // Check if the click is outside the editor

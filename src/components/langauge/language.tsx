@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styles from './language.module.css';
 import { useNavigate } from 'react-router-dom';
+import posthog from 'posthog-js'
+posthog.init('phc_SkoWOGNlQvwgXkAqlKWmYT6l0JStbH2Dpeh5dtY1b2N', { api_host: 'https://us.i.posthog.com' })
 
 const calculateCompletion = (topics) => {
   let totalWeight = 0;
@@ -99,7 +101,7 @@ window.addEventListener('beforeunload', function(event) {
   // Handle language selection
   const handleLanguageClick = async (language) => {
     const storedLanguage = localStorage.getItem('language');
-
+    
     if (storedLanguage === language) {
       navigate('/main');
       return;
@@ -120,6 +122,11 @@ window.addEventListener('beforeunload', function(event) {
 
     try {
       if (myCourses.includes(language)) {
+
+        posthog.capture('course_continued' , {
+          Language : language
+        });
+
         const selectedTopic = allTopics.find(topic => topic.language === language);
         if (selectedTopic) {
           localStorage.setItem('topics', JSON.stringify(selectedTopic.topics));
@@ -135,7 +142,9 @@ window.addEventListener('beforeunload', function(event) {
         });
 
         if (!response.ok) throw new Error('Failed to fetch topics');
-
+        posthog.capture('started_new_course' ,{
+          Language : language
+        });
         const { data } = await response.json();
         if (Array.isArray(data)) {
           const newTopics = data.find(t => t.language === language);
