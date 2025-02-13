@@ -45,11 +45,12 @@ export const sendMessage = async (message: string): Promise<SingleMessageRespons
 export const getPastConversations = async (): Promise<PastConversationsResponse> => {
   try {
     const subtopicId = localStorage.getItem('currentSubtopic');
-    
+    const language = localStorage.getItem('language');
+    const backendlanguage = language.toLowerCase();
     const response = await api.get('/chat/past', {
       params: {
         subtopicId,
-
+        backendlanguage
       },
     });
     

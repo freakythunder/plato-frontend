@@ -91,7 +91,7 @@ window.addEventListener('beforeunload', (event) => {
 });
   // Load initial data
   useEffect(() => {
-    console.log('[Initial Load] Starting data initialization');
+  console.log('[Initial Load] Starting data initialization');
   
   const storedAllTopics = localStorage.getItem('allTopics');
   const storedLanguage = localStorage.getItem('language');
@@ -127,6 +127,7 @@ window.addEventListener('beforeunload', (event) => {
           
           console.log('[Initial Load] Updated allTopics:', parsedTopics);
           localStorage.setItem('allTopics', JSON.stringify(parsedTopics));
+          console.log("parsed topics : ",parsedTopics);
           console.log('[Initial Load] Saved updated allTopics to storage');
         }
         else {
@@ -135,6 +136,15 @@ window.addEventListener('beforeunload', (event) => {
       }
       else {
         console.warn('[Initial Load] Stored language not found in allTopics');
+        const newLanguageEntry = {
+          language: storedLanguage,
+          topics: currentTopics,
+        };
+    
+        // Add to parsedTopics and update storage
+        parsedTopics = [...parsedTopics, newLanguageEntry];
+        localStorage.setItem('allTopics', JSON.stringify(parsedTopics));
+        
       }
     }
 

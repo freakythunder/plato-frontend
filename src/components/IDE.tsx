@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
-import Editor from '@monaco-editor/react';
+import Editor, { loader } from '@monaco-editor/react';
 import styles from '../Styles/IDE.module.css';
 import { executeCode } from '../services/codeService';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +12,18 @@ interface IDEProps {
 export interface IDERef {
   getCode: () => string; 
 }
+
+// Define custom theme with enhanced token colors
+
+
+// Language mapping configuration
+const languageMap: { [key: string]: string } = {
+  'python': 'python',
+  'cpp': 'cpp',
+  'c++': 'cpp',
+  'java': 'java',
+  'javascript': 'javascript'
+};
 
 const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
   const placeholderText = 
@@ -34,9 +46,22 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
   useImperativeHandle(ref, () => ({
     getCode: () => code,
   }));
+  const getInitialLanguage = () => {
+    const stored = localStorage.getItem('language') || 'javascript';
+    return languageMap[stored.toLowerCase()] || 'javascript';
+  };
+  const [editorLanguage, setEditorLanguage] = useState(getInitialLanguage());
   
-
- 
+  const monacoRef = useRef<any>(null);
+  useEffect(() => {
+    const lang = localStorage.getItem('language');
+    if (lang && editorRef.current && monacoRef.current) {
+      const newLang = languageMap[lang.toLowerCase()] || 'javascript';
+      setEditorLanguage(newLang);
+      const model = editorRef.current.getModel();
+      monacoRef.current.editor.setModelLanguage(model, newLang);
+    }
+  }, [localStorage.getItem('language')]);
   useEffect(() => {
     if (shouldClearCode) {
       setCode(''); // Clear the code if the variable is true
@@ -45,12 +70,14 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
     }
   }, [shouldClearCode, setShouldClearCode]);
 
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = (editor: any,monaco: any) => {
     editorRef.current = editor;
-
+    
     editor.onDidFocusEditorWidget(() => {
       if (isPlaceholderActive) {
          // Clear placeholder only on focus
+         monacoRef.current = monaco;
+    editor.updateOptions({ language: editorLanguage });
       }
     });
   };
@@ -135,7 +162,7 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
       </div>
       <div className={styles.editorContainer}>
         <Editor
-          defaultLanguage="python"
+          language={editorLanguage}
           value={code}
           onChange={handleCodeChange}
           theme="vs-dark"
