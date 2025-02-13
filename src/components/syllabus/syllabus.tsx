@@ -44,6 +44,10 @@ const Syllabus: React.FC = () => {
   const [currentindex, setcurrentindex] = useState<number | null>(null);
 
 
+
+
+
+
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (popupRef.current && !popupRef.current.contains(event.target as Node)) {

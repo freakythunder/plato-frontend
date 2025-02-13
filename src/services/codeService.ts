@@ -11,7 +11,7 @@ export const executeCode = (code: string) => new Promise((resolve, reject) => {
   const connectionTimeout = setTimeout(() => {
     reject(new Error('Connection timeout'));
     ws.close();
-  }, 5000);
+  }, 10000);
   let connectionClosed = false;
   const flushBuffer = () => {
     if (!connectionClosed) {
