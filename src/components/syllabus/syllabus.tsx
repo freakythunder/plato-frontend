@@ -119,7 +119,7 @@ const Syllabus: React.FC = () => {
       setHasClickedNextButton(false);
       switchToNextSubtopic(newTopics);
     } else if (hasClickedNextButton && !hasRunCode) {
-      alert('Please complete this subtopic before proceeding.');
+      alert('You need one successful code run before going to next subtopic. Please run code once.');
       setHasClickedNextButton(false);
     }
   }, [hasRunCode, hasClickedNextButton, currentTopic, currentSubtopicIndex, topics]);

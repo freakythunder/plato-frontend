@@ -12,16 +12,23 @@
     width: 100%; /* Ensures the input takes all available width */
 }
 
+/* Replace .input styles with */
 .input {
-    width: 100%; /* Full width input */
-    padding: 12px 40px 12px 12px; /* Space for the arrow on the right */
+    width: 100%;
+    padding: 12px 40px 12px 12px;
     border: 1px solid #d1d5da;
-    border-radius: 25px; /* Rounded input for modern UI */
+    border-radius: 25px;
     font-size: 14px;
     outline: none;
     background-color: #ffffff;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    resize: none;
+    overflow-y: hidden;
+    min-height: 46px;
+    line-height: 1.5;
+    transition: all 0.2s ease;
 }
+
 
 .input:focus {
     border-color: #1f3b4d;

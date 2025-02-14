@@ -29,12 +29,6 @@ const Language: React.FC = () => {
   const [otherLanguages, setOtherLanguages] = useState([]);
   const [completions, setCompletions] = useState({});
  
-  // Add localStorage debug logger at the top
-const debugLog = (...args) => {
-  const logs = JSON.parse(localStorage.getItem('closeLogs') || '[]');
-  logs.push({ time: new Date().toISOString(), data: args });
-  localStorage.setItem('closeLogs', JSON.stringify(logs));
-};
 
 // Track latest allTopics state using ref
 const allTopicsRef = React.useRef(allTopics);
@@ -44,7 +38,7 @@ React.useEffect(() => {
 
 // Revised backend sync with beacon API and fallback
 function sendTopicsToBackend(topics) {
-  debugLog('Initiating backend sync', topics);
+  
   const url = `${process.env.REACT_APP_API_URL}/language/update-topics`;
   const token = localStorage.getItem("token");
   
@@ -59,36 +53,56 @@ function sendTopicsToBackend(topics) {
       body: JSON.stringify({ topics }),
       keepalive: true // Ensures request continues during unload
     }).then(() => {
-      debugLog('Fetch with keepalive queued successfully');
+     
     }).catch(e => {
-      debugLog('Fetch with keepalive failed:', e);
+      
     });
   } catch (error) {
-    debugLog('Sync error:', error);
+    
   }
 }
 
 // Enhanced unload handler with state preservation
 window.addEventListener('beforeunload', (event) => {
-  debugLog('Tab closing detected');
+ 
   
   // Get current language and latest topics
   const currentLanguage = localStorage.getItem('language');
   const currentTopics = allTopicsRef.current;
   
-  debugLog('Current language:', currentLanguage);
-  debugLog('Latest allTopics:', currentTopics);
+
 
   // Force sync before unload
   if (currentTopics?.length > 0) {
-    debugLog('Starting final sync');
+
     sendTopicsToBackend(currentTopics);
     
     // Ensure localStorage matches current state
     localStorage.setItem('allTopics', JSON.stringify(currentTopics));
-    debugLog('LocalStorage updated');
+
   }
 });
+
+
+// Modified interval implementation
+useEffect(() => {
+  // Global interval flag
+  (window as any)._autoSaveInterval = (window as any)._autoSaveInterval || setInterval(() => {
+    const topics = JSON.parse(localStorage.getItem('allTopics') || '[]');
+    if (topics.length > 0) {
+      
+      sendTopicsToBackend(topics);
+    }
+  }, 5000);
+
+  // Cleanup only on full page unload
+  return () => {
+    window.addEventListener('beforeunload', () => {
+      clearInterval((window as any)._autoSaveInterval);
+    });
+  };
+}, []); // Empty dependency array ensures it runs once
+
   // Load initial data
   useEffect(() => {
   console.log('[Initial Load] Starting data initialization');
