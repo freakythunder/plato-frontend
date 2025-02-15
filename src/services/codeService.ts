@@ -1,78 +1,131 @@
 import { v4 as uuidv4 } from 'uuid';
 
-export const executeCode = (code: string) => new Promise((resolve, reject) => {
+// Define return type interface
+interface ExecutionResult {
+  ws: WebSocket;
+  promise: Promise<{
+    data: {
+      output: string;
+      executionSuccess: boolean;
+    }
+  }>;
+}
+
+export const executeCode = (code: string): ExecutionResult => {
   const sessionId = uuidv4();
   let language = localStorage.getItem('language') || 'python';
-  let lowercaselanguage = language.toLowerCase();
-  const ws = new WebSocket(`wss://code-executor-app.ambitioussmoke-08c18a0b.eastus2.azurecontainerapps.io`);
+  const lowercaselanguage = language.toLowerCase();
+  const ws = new WebSocket(`wss://code-executor-app.ambitioussmoke-08c18a0b.eastus2.azurecontainerapps.io/`);
   language = lowercaselanguage;
+  // Add connection state tracking
+  let isConnectionOpen = false;
+
   const output: string[] = [];
-  let executionSuccess = false;
-  const connectionTimeout = setTimeout(() => {
-    reject(new Error('Connection timeout'));
-    ws.close();
-  }, 10000);
+  let executionSuccess = false
+  let inputRequired = false;
   let connectionClosed = false;
-  const flushBuffer = () => {
+  let resolvePromise: (value: any) => void;
+  let rejectPromise: (reason?: any) => void;
+  const connectionTimeout = setTimeout(() => {
     if (!connectionClosed) {
-      resolve({
-        data: {
-          output: output.join('\n'),
-          executionSuccess
-        }
-      });
+      ws.close(1000, 'Input timeout');
+      connectionClosed = true;
     }
-  };
-  ws.onopen = () => {
-    clearTimeout(connectionTimeout);
-    ws.send(JSON.stringify({
-      language,
-      code: code || '',
-      inputs: [] // Add any input handling logic here
-    }));
-  };
+  }, 30000);
+  // Add debug logs
+  console.log('Initializing WebSocket connection...');
+  console.log('Current language:', language);
 
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    switch(data.type) {
-      case 'stdout':
-        output.push(data.data);
-        console.log("data :",data.data);
-        break;
-      case 'stderr':
-        output.push(`ERROR: ${data.data}`);
-        break;
-      case 'exit':
+  const promise = new Promise<{ data: { output: string; executionSuccess: boolean } }>((resolve, reject) => {
+    resolvePromise = resolve;
+    rejectPromise = reject;
+
+    ws.onopen = () => {
+      console.log('WebSocket connection opened');
+      ws.send(JSON.stringify({
+        type: 'execute', // Required by server
+        language,
+        code: code || '',
+        inputs: []
+      }));
+    };
+
+    ws.onmessage = (event) => {
+      console.log('Received message:', event.data);
+      const data = JSON.parse(event.data);
+      switch (data.type) {
+        case 'stdout':
+          output.push(data.data);
+          break;
+        case 'input_required':
+          inputRequired = true;
+          break;
+        case 'stderr':
+          output.push(`ERROR: ${data.data}`);
+          clearTimeout(connectionTimeout);
+          break;
+          break;
+        case 'exit':
+          
+        clearTimeout(connectionTimeout);
+        inputRequired = false;
         executionSuccess = data.code === 0;
-        // Delay closure to ensure final messages are processed
-        setTimeout(() => ws.close(), 100);
-        break;
-      case 'complete':  // Add server-side completion message
-        flushBuffer();
-        break;
-    }
-  };
-
-  ws.onclose = (event) => {
-    connectionClosed = true;
-    
-    // Proper clean closure detection
-    if (event.wasClean) {
-      resolve({
-        data: {
-          output: output.join('\n'),
-          executionSuccess
+        if (!connectionClosed) {
+          connectionClosed = true;
+          ws.close(1000, 'Normal closure after exit');
         }
-      });
-    } else {
-      // Enhanced error details using CloseEvent properties
-      const errorMessage = `Connection closed unexpectedly: 
-        Code ${event.code} - ${event.reason || 'No reason provided'}`;
-      reject(new Error(errorMessage));
-    }
-  };
+        resolvePromise({
+          data: {
+            output: output.join('\n'),
+            executionSuccess
+          }
+        });
+        break;
+        case 'error':
+          clearTimeout(connectionTimeout);
+          rejectPromise(new Error(data.data));
+          break;
+        case 'complete':
+          clearTimeout(connectionTimeout);
+          if (!connectionClosed) {
+            connectionClosed = true;
+            ws.close(1000, 'Normal closure after complete');
+          }
+          resolvePromise({
+            data: {
+              output: output.join('\n'),
+              executionSuccess
+            }
+          });
+          break;
+      }
+    };
 
-  ws.onerror = (error) => {
-    reject(error);
+    ws.onclose = (event) => {
+      if (!connectionClosed) {
+        connectionClosed = true;
+        clearTimeout(connectionTimeout);
+        if (event.wasClean) {
+          resolvePromise({
+            data: {
+              output: output.join('\n'),
+              executionSuccess
+            }
+          });
+        } else {
+          rejectPromise(new Error(`Connection closed: ${event.reason || 'Unknown reason'}`));
+        }
+      }
+    };
+
+    ws.onerror = (error) => {
+      clearTimeout(connectionTimeout);
+      rejectPromise(error);
+    };
+  });
+
+  return {
+    ws,
+    promise
   };
-});
+};

@@ -16,7 +16,7 @@ const HorizontalSplitter: React.FC<HorizontalSplitterProps> = ({ onCodeChange}) 
   const splitterRef = useRef<HTMLDivElement>(null);
   const isResizing = useRef(false);
   const ideRef = useRef<IDERef>(null);
-  
+  const [activeWebSocket, setActiveWebSocket] = useState<WebSocket | null>(null);
   const { shouldClearCode, setShouldClearCode } = useAuth();
 
 
@@ -44,6 +44,7 @@ const HorizontalSplitter: React.FC<HorizontalSplitterProps> = ({ onCodeChange}) 
 
   // Callback to handle code output and open the output pane
   const handleRunCode = useCallback((output: string) => {
+    
     setOutput(output);
     setOutputHeightPercent(30);
     handleGetCode (); // Set initial output height to 30%
@@ -91,11 +92,13 @@ const HorizontalSplitter: React.FC<HorizontalSplitterProps> = ({ onCodeChange}) 
     };
   }, []);
 
+
+
   return (
     <div ref={containerRef} className={styles.splitterContainer} style={{ position: 'relative', height: '100%' }}>
       {/* IDE Section */}
       <div className={styles.ideSection} style={{ height: `${ideHeightPercent}%`, overflow: 'hidden' }}>
-      <IDE ref={ideRef} height={ideHeightPercent} onRun={handleRunCode} />
+      <IDE ref={ideRef} onWebSocketCreate={setActiveWebSocket} height={ideHeightPercent} onRun={handleRunCode} />
       </div>
 
       {/* Splitter Section */}
@@ -103,7 +106,7 @@ const HorizontalSplitter: React.FC<HorizontalSplitterProps> = ({ onCodeChange}) 
 
       {/* Output Section */}
       <div className={styles.outputSection} style={{ height: outputHeightPercent ? `${outputHeightPercent}%` : '0', display: outputHeightPercent ? 'block' : 'none' }}>
-        <ResizableOutput output={output} isLoading={false} onClose={handleCloseOutput} containerWidth={containerRef.current?.clientWidth || 0} height={outputHeightPercent} />
+        <ResizableOutput output={output} webSocket={activeWebSocket} isLoading={false} onClose={handleCloseOutput} containerWidth={containerRef.current?.clientWidth || 0} height={outputHeightPercent} />
       </div>
     </div>
   );
