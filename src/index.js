@@ -16,6 +16,6 @@ root.render(
       options={options}
     >
       <App />
-    </PostHogProvider
+    </PostHogProvider>
 );
 
