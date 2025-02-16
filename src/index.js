@@ -10,11 +10,12 @@ const options = {
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
 
+
     <PostHogProvider
       apiKey={process.env.REACT_APP_PUBLIC_POSTHOG_KEY}
       options={options}
     >
       <App />
-    </PostHogProvider>
+    </PostHogProvider
 );
 
