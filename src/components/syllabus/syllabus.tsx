@@ -43,7 +43,7 @@ const Syllabus: React.FC = () => {
   const popupRef = useRef<HTMLDivElement | null>(null);
   const [currentindex, setcurrentindex] = useState<number | null>(null);
 
-
+  const {setShouldClearCode} = useAuth();
 
 
 
@@ -149,6 +149,7 @@ const Syllabus: React.FC = () => {
         }
       }
       updateAllTopicsInLocalStorage(topics);
+      setShouldClearCode(true);
     }
   };
   const updateAllTopicsInLocalStorage = (updatedTopics: Topic[]) => {
