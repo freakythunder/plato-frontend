@@ -4,101 +4,152 @@ import styles from '../Styles/IDE.module.css';
 import { executeCode } from '../services/codeService';
 import { useAuth } from '../context/AuthContext';
 import { useProgress } from '../context/AppContext';
+
 interface IDEProps {
   height: number;
   onRun: (output: string) => void;
-   
+  onWebSocketCreate: (ws: WebSocket) => void; 
 }
 export interface IDERef {
   getCode: () => string; 
 }
 
-const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
-  const placeholderText = 
-  `
+const languageMap: { [key: string]: string } = {
+  python: 'python',
+  cpp: 'cpp',
+  'c++': 'cpp',
+  java: 'java',
+  javascript: 'javascript'
+};
+
+const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun, onWebSocketCreate }, ref) => {
+  const placeholderText = `
   /*
   This is the code editor where you will practice writing code. 
-  Just follow the instructions in the section to the left.  
+  Just follow the instructions in the section to the left.
   */
-  `
+  `;
   const { shouldClearCode, setShouldClearCode } = useAuth();
-  const [code, setCode] = useState<string>();
+  const [code, setCode] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPlaceholderActive, setIsPlaceholderActive] = useState<boolean>(true);
   const editorRef = useRef<any>(null);
   const hasRunButtonClicked = useRef<boolean>(false);
   const runButtonRef = useRef<HTMLButtonElement | null>(null);
   const { setHasRunCode } = useProgress();
-
+  const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
 
   useImperativeHandle(ref, () => ({
     getCode: () => code,
   }));
-  
 
- 
+  const getInitialLanguage = () => {
+    const stored = localStorage.getItem('language') || 'javascript';
+    return languageMap[stored.toLowerCase()] || 'javascript';
+  };
+  const [editorLanguage, setEditorLanguage] = useState(getInitialLanguage());
+  const monacoRef = useRef<any>(null);
+
+  useEffect(() => {
+    const lang = localStorage.getItem('language');
+    if (lang && editorRef.current && monacoRef.current) {
+      const newLang = languageMap[lang.toLowerCase()] || 'javascript';
+      setEditorLanguage(newLang);
+      const model = editorRef.current.getModel();
+      monacoRef.current.editor.setModelLanguage(model, newLang);
+      console.log("Editor language updated to:", newLang);
+    }
+  }, [localStorage.getItem('language')]);
+
   useEffect(() => {
     if (shouldClearCode) {
-      setCode(''); // Clear the code if the variable is true
-      setShouldClearCode(false); // Reset the variable
-      console.log("cleared in ide");
+      setCode('');
+      setShouldClearCode(false);
+      console.log("Code cleared due to shouldClearCode flag");
     }
   }, [shouldClearCode, setShouldClearCode]);
 
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
-
     editor.onDidFocusEditorWidget(() => {
       if (isPlaceholderActive) {
-         // Clear placeholder only on focus
+        monacoRef.current = monaco;
+        editor.updateOptions({ language: editorLanguage });
+        console.log("Editor focused, updating language options");
       }
     });
   };
 
   const handleCodeChange = (value: string | undefined) => {
     if (value !== undefined && value !== placeholderText) {
-      // Only update the code if it is different from the current code
-        setCode(value);
-        setIsPlaceholderActive(false);
-      
+      setCode(value);
+      setIsPlaceholderActive(false);
+      console.log("Editor code updated");
     }
   };
 
+  // Single cleanup effect with explicit valid close code and logging.
+  useEffect(() => {
+    return () => {
+      if (wsConnection && wsConnection.readyState !== WebSocket.CLOSED) {
+        console.log("Component unmounting: closing WebSocket with code 1000");
+        wsConnection.close(1000, 'Component unmount');
+      } else {
+        console.log("No active WebSocket connection to close on unmount");
+      }
+    };
+  }, [wsConnection]);
 
   const handleRunCode = async () => {
     if (isPlaceholderActive) return;
-    hasRunButtonClicked.current = true; // Prevent running placeholder text
+    hasRunButtonClicked.current = true;
     setIsLoading(true);
+    console.log("Run code initiated. isLoading set to true.");
     try {
-      const result = await executeCode(code);
-      const output = result.success ? result.data.output : 'Error while executing code.';
-      if(result.data.executionSuccess){
+      const { ws, promise } = executeCode(code || '');
+      setWsConnection(ws);
+      onWebSocketCreate(ws);
+      ws.addEventListener('message', (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'stdout' || data.type === 'stderr') {
+          onRun(data.data);
+        }
+      });
+      const result = await promise;
+      console.log("Execution result received:", result);
+      console.log("output: ", result.data.output);
+      onRun(result.data.output);
+      if (result.data.executionSuccess) {
         setHasRunCode(true);
+        console.log("Execution successful; setHasRunCode updated.");
       }
-      onRun(output); // Trigger output update immediately
-      
-    } catch {
-      onRun('Error while executing code.');
+    } catch (error) {
+      console.log("Error during execution:", error);
+      if (error instanceof Error) {
+        onRun(`Error: ${error.message}`);
+      } else {
+        onRun('Error: Unknown execution error');
+      }
     } finally {
+      console.log("Finalizing run: setting isLoading to false.");
       setIsLoading(false);
     }
   };
 
   const handleClickOutside = (event: MouseEvent) => {
-    // Check if the click is outside the editor
     const clickedElement = event.target as HTMLElement;
     if (
       editorRef.current &&
-      !editorRef.current.getDomNode().contains(clickedElement) && // Not inside editor
-      runButtonRef.current !== clickedElement && // Not the "Run" button itself
-      !runButtonRef.current?.contains(clickedElement) 
+      !editorRef.current.getDomNode().contains(clickedElement) &&
+      runButtonRef.current !== clickedElement &&
+      !runButtonRef.current?.contains(clickedElement)
     ) {
-      if (!hasRunButtonClicked.current &&(!code || !code.trim())) {
-        setIsPlaceholderActive(true); // Show placeholder if no code and "Run" hasn't been clicked
+      if (!hasRunButtonClicked.current && (!code || !code.trim())) {
+        setIsPlaceholderActive(true);
+        console.log("Click outside detected; activating placeholder.");
       }
     }
   };
-
 
   useEffect(() => {
     document.addEventListener('click', handleClickOutside);
@@ -111,6 +162,7 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
     <div className={styles.ideContainer}>
       <div className={styles.buttonContainer}>
         <button
+          ref={runButtonRef}
           className={styles.runButton}
           onClick={handleRunCode}
           disabled={isPlaceholderActive || isLoading}
@@ -120,7 +172,7 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun }, ref) => {
       </div>
       <div className={styles.editorContainer}>
         <Editor
-          defaultLanguage="python"
+          language={editorLanguage}
           value={code}
           onChange={handleCodeChange}
           theme="vs-dark"

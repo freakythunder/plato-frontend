@@ -64,3 +64,28 @@
   font-style: italic;
   color: #888;
 }
+
+
+.inputContainer {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #2d2d2d;
+}
+
+.inputContainer input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #444;
+  background: #1e1e1e;
+  color: white;
+}
+
+.inputContainer button {
+  padding: 0.5rem 1rem;
+  background: #007acc;
+  border: none;
+  color: white;
+  cursor: pointer;
+}

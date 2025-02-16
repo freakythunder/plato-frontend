@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styles from './language.module.css';
 import { useNavigate } from 'react-router-dom';
+import posthog from 'posthog-js'
+posthog.init('phc_SkoWOGNlQvwgXkAqlKWmYT6l0JStbH2Dpeh5dtY1b2N', { api_host: 'https://us.i.posthog.com' })
 
 const calculateCompletion = (topics) => {
   let totalWeight = 0;
@@ -27,38 +29,143 @@ const Language: React.FC = () => {
   const [otherLanguages, setOtherLanguages] = useState([]);
   const [completions, setCompletions] = useState({});
  
-  function sendTopicsToBackend(topics) {
-   fetch(`${process.env.REACT_APP_API_URL}/language/update-topics`, {
+
+// Track latest allTopics state using ref
+const allTopicsRef = React.useRef(allTopics);
+React.useEffect(() => {
+  allTopicsRef.current = allTopics;
+}, [allTopics]);
+
+// Revised backend sync with beacon API and fallback
+function sendTopicsToBackend(topics) {
+  
+  const url = `${process.env.REACT_APP_API_URL}/language/update-topics`;
+  const token = localStorage.getItem("token");
+  
+  try {
+    // Primary method: fetch with keepalive and headers
+    fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${token}`,
       },
-        body: JSON.stringify({ topics })
-    })
-    .then(response => response.json())
-    .then(data => console.log('Topics sent successfully:', data))
-    .catch(error => console.error('Error sending topics:', error));
+      body: JSON.stringify({ topics }),
+      keepalive: true // Ensures request continues during unload
+    }).then(() => {
+     
+    }).catch(e => {
+      
+    });
+  } catch (error) {
+    
+  }
 }
 
-// Listen for tab close event
-window.addEventListener('beforeunload', function(event) {
-    // Get topics from local storage
-    const topics = JSON.parse(localStorage.getItem('allTopics'));
+// Enhanced unload handler with state preservation
+window.addEventListener('beforeunload', (event) => {
+ 
+  
+  // Get current language and latest topics
+  const currentLanguage = localStorage.getItem('language');
+  const currentTopics = allTopicsRef.current;
+  
 
-    if (topics.length > 0) {
-        // Send topics to the backend
-        sendTopicsToBackend(topics);
-    }
+
+  // Force sync before unload
+  if (currentTopics?.length > 0) {
+
+    sendTopicsToBackend(currentTopics);
+    
+    // Ensure localStorage matches current state
+    localStorage.setItem('allTopics', JSON.stringify(currentTopics));
+
+  }
 });
+
+
+// Modified interval implementation
+useEffect(() => {
+  // Global interval flag
+  (window as any)._autoSaveInterval = (window as any)._autoSaveInterval || setInterval(() => {
+    const topics = JSON.parse(localStorage.getItem('allTopics') || '[]');
+    if (topics.length > 0) {
+      
+      sendTopicsToBackend(topics);
+    }
+  }, 5000);
+
+  // Cleanup only on full page unload
+  return () => {
+    window.addEventListener('beforeunload', () => {
+      clearInterval((window as any)._autoSaveInterval);
+    });
+  };
+}, []); // Empty dependency array ensures it runs once
+
   // Load initial data
   useEffect(() => {
-    const storedAllTopics = localStorage.getItem('allTopics');
+  console.log('[Initial Load] Starting data initialization');
+  
+  const storedAllTopics = localStorage.getItem('allTopics');
+  const storedLanguage = localStorage.getItem('language');
+  
+  console.log('[Initial Load] Stored language:', storedLanguage);
+  console.log('[Initial Load] Raw allTopics from storage:', storedAllTopics);
+
+  if (storedAllTopics) {
+    let parsedTopics = JSON.parse(storedAllTopics);
+    console.log('[Initial Load] Parsed allTopics:', parsedTopics);
+
+    // Synchronization logic for current language's topics
+    if (storedLanguage) {
+      console.log(`[Initial Load] Checking topic synchronization for ${storedLanguage}`);
+      
+      const currentTopics = JSON.parse(localStorage.getItem('topics')) || [];
+      console.log('[Initial Load] Current topics from storage:', currentTopics);
+
+      const languageIndex = parsedTopics.findIndex(t => t.language === storedLanguage);
+      console.log('[Initial Load] Language index in allTopics:', languageIndex);
+
+      if (languageIndex !== -1) {
+        const existingTopics = parsedTopics[languageIndex].topics;
+        console.log('[Initial Load] Existing topics in allTopics:', existingTopics);
+        
+        // Compare topics using stringify for deep equality check
+        if (JSON.stringify(existingTopics) !== JSON.stringify(currentTopics)) {
+          console.log('[Initial Load] Topics mismatch detected, updating allTopics');
+          parsedTopics[languageIndex] = { 
+            ...parsedTopics[languageIndex], 
+            topics: currentTopics 
+          };
+          
+          console.log('[Initial Load] Updated allTopics:', parsedTopics);
+          localStorage.setItem('allTopics', JSON.stringify(parsedTopics));
+          console.log("parsed topics : ",parsedTopics);
+          console.log('[Initial Load] Saved updated allTopics to storage');
+        }
+        else {
+          console.log('[Initial Load] Topics are synchronized, no update needed');
+        }
+      }
+      else {
+        console.warn('[Initial Load] Stored language not found in allTopics');
+        const newLanguageEntry = {
+          language: storedLanguage,
+          topics: currentTopics,
+        };
     
-    if (storedAllTopics) {
-      const parsedTopics = JSON.parse(storedAllTopics);
-      setAllTopics(parsedTopics);
-      updateCompletions(parsedTopics);
+        // Add to parsedTopics and update storage
+        parsedTopics = [...parsedTopics, newLanguageEntry];
+        localStorage.setItem('allTopics', JSON.stringify(parsedTopics));
+        
+      }
+    }
+
+    // Update state with (possibly modified) allTopics
+    setAllTopics(parsedTopics);
+    updateCompletions(parsedTopics);
+    console.log('[Initial Load] Updated state with allTopics');
 
       const courses = parsedTopics.map(topic => topic.language);
       setMyCourses(courses);
@@ -99,7 +206,7 @@ window.addEventListener('beforeunload', function(event) {
   // Handle language selection
   const handleLanguageClick = async (language) => {
     const storedLanguage = localStorage.getItem('language');
-
+    
     if (storedLanguage === language) {
       navigate('/main');
       return;
@@ -120,6 +227,11 @@ window.addEventListener('beforeunload', function(event) {
 
     try {
       if (myCourses.includes(language)) {
+
+        posthog.capture('course_continued' , {
+          Language : language
+        });
+
         const selectedTopic = allTopics.find(topic => topic.language === language);
         if (selectedTopic) {
           localStorage.setItem('topics', JSON.stringify(selectedTopic.topics));
@@ -135,7 +247,9 @@ window.addEventListener('beforeunload', function(event) {
         });
 
         if (!response.ok) throw new Error('Failed to fetch topics');
-
+        posthog.capture('started_new_course' ,{
+          Language : language
+        });
         const { data } = await response.json();
         if (Array.isArray(data)) {
           const newTopics = data.find(t => t.language === language);

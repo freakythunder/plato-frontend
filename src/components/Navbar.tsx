@@ -7,7 +7,7 @@ import { getAuth, signOut } from "firebase/auth";
 import Syllabus from './syllabus/syllabus';
 import { useLocation } from 'react-router-dom';
 import { json } from 'express';
-
+import posthog from 'posthog-js';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const Navbar: React.FC = () => {
   const handleLogout = async () => {
     try {
       console.log('Attempting to log out'); // Log start of logout
-
+  
       const alltopics = JSON.parse(localStorage.getItem('allTopics'));
       const topics = JSON.parse(localStorage.getItem('topics'));
       
@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
         await signOut(auth);
         navigate('/');
       }, 1000); // Half a second delay to ensure backend completion
-
+      
     } catch (error) {
       console.error('Logout request failed:', error);
 
@@ -66,6 +66,8 @@ const Navbar: React.FC = () => {
       navigate('/');
 
     }
+
+    posthog.reset(true);
   };
 
   const toggleMenu = () => {

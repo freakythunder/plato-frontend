@@ -6,7 +6,8 @@ import { useAuth } from "../context/AuthContext"; // Assuming this manages user 
 import googleIcon from "../assets/icons8-google.svg";
 import firebase from 'firebase/compat/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth'; // Updated imports
-
+import posthog from 'posthog-js'
+posthog.init('phc_SkoWOGNlQvwgXkAqlKWmYT6l0JStbH2Dpeh5dtY1b2N', { api_host: 'https://us.i.posthog.com' })
 // Reusable LoadingScreen Component
 const LoadingScreen: React.FC<{ message: string }> = ({ message }) => (
   <div className={styles.loadingScreen} aria-live="polite">
@@ -39,7 +40,7 @@ const HomePage: React.FC = () => {
       console.log("User signed in successfully:", result.user);
       if (result.user) {
         const user = result.user;
-
+        
         // Get a fresh ID token using onAuthStateChanged
         const idTokenPromise = new Promise((resolve, reject) => {
           onAuthStateChanged(auth, (user) => {
@@ -78,7 +79,9 @@ const HomePage: React.FC = () => {
       } else {
         throw new Error("Invalid response from server");
       }
-    } catch (error: any) {
+      posthog.identify(user.email , {username : user.displayName });
+      posthog.capture('user_signed_up', { username: user.displayName });
+    }  catch (error: any) {
       console.error("Authentication error:", error);
       setErrorMessage(error.response?.data?.message || "Failed to authenticate.");
     } finally {
@@ -101,7 +104,7 @@ const HomePage: React.FC = () => {
           <div className={styles.content}>
             <h1 className={styles.title}>Welcome to Plato</h1>
             <p className={styles.subtitle}>
-              We've built a personal tutor to help you learn JavaScript! This is our first
+              We've built a personal tutor to help you learn to code! This is our first
               prototype, and we'd love your feedback. Book a call with the founders to share your
               feedback{" "}
               <a
