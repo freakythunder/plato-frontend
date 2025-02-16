@@ -231,8 +231,10 @@ const formatMessage = (message: string): string => {
     const topics = JSON.parse(localStorage.getItem('topics'));
     const currentTopic = topics.find((t) => t.subtopics.find((st) => st.name === currentSubtopic));
     const currentSubtopicIndex = currentTopic.subtopics.indexOf(currentTopic.subtopics.find((st) => st.name === currentSubtopic));
-
+    
     if (currentTopic.subtopics[currentSubtopicIndex].completed) {
+      
+    
       // Find the next subtopic
       if (currentSubtopicIndex < currentTopic.subtopics.length - 1) {
         // Next subtopic is within the same topic
@@ -254,11 +256,15 @@ const formatMessage = (message: string): string => {
     }
     else {
       setHasClickedNextButton(true);
+      
     }
   };
 
 
   const handleButtonClick = async (buttonText: string) => {
+    if(buttonText === 'I want to practice another example'){ // Handle button click event
+      setShouldClearCode(true);
+    }
     handleSendMessage(buttonText); // Send the message with code
   };
 
