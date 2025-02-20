@@ -4,7 +4,7 @@ import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import styles from "./syllabus.module.css";
 import { useProgress } from "../../context/AppContext";
 import { useAuth } from '../../context/AuthContext';
-
+import posthog from "posthog-js";
 interface Subtopic {
   id: number;
   name: string;
@@ -37,16 +37,19 @@ const Syllabus: React.FC = () => {
     }
   });
   const { hasRunCode, hasClickedNextButton, setHasRunCode, setHasClickedNextButton } = useProgress();
-  const [currentSubtopicIndex, setCurrentSubtopicIndex] = useState<number | null>(null);
-  const [currentTopic, setCurrentTopic] = useState<Topic | null>(null);
-  const [currentSubtopic, setCurrentSubtopic] = useState<string | null>(null);
+  const {currentTopic, setCurrentTopic} = useProgress();
   const popupRef = useRef<HTMLDivElement | null>(null);
   const [currentindex, setcurrentindex] = useState<number | null>(null);
+  const {currentSubtopic , setCurrentSubtopic} = useProgress();
+  const { setShouldClearCode } = useAuth();
+  const [prevIndex, setPrevIndex] = useState<number | null>(null);
+  const arrowTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const {setShouldClearCode} = useAuth();
-
-
-
+  const getCurrentSubtopicIndex = (topic: Topic): number => {
+    const storedSubtopic = currentSubtopic;
+    if (!storedSubtopic) return -1;
+    return topic.subtopics.findIndex((sub) => sub.name === storedSubtopic);
+  };
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -74,12 +77,14 @@ const Syllabus: React.FC = () => {
     }
   }, [topics, setTopics]);
 
-
+  // useEffect(() => {
+  //   findCurrentSubtopic(topics);
+  // }, []);
 
   useEffect(() => {
 
     if (topics) {
-      findCurrentSubtopic(topics);
+      //findCurrentSubtopic(topics);
       localStorage.setItem('topics', JSON.stringify(topics));
     }
   }, [topics]);
@@ -93,62 +98,88 @@ const Syllabus: React.FC = () => {
       if (subtopic) {
         setCurrentSubtopic(subtopic.name);
         setCurrentTopic(topic);
-        setCurrentSubtopicIndex(topic.subtopics.indexOf(subtopic));
-        localStorage.setItem('currentSubtopic', subtopic.name);
+        setCurrentSubtopic(subtopic.name);
       }
     }
   };
+  const hasCalledFindCurrentSubtopic = useRef(false);
+  useEffect(() => {
+    if (!hasCalledFindCurrentSubtopic.current && topics) {
+      findCurrentSubtopic(topics);
+      hasCalledFindCurrentSubtopic.current = true;
+    }
+  }, [topics]);
 
   useEffect(() => {
-    if (hasRunCode && hasClickedNextButton && currentTopic && currentSubtopicIndex !== null) {
-      const newTopics = topics.map((topic) => {
-        if (topic.id === currentTopic.id) {
-          const updatedSubtopics = topic.subtopics.map((sub, index) => {
-            if (index === currentSubtopicIndex) {
-              return { ...sub, completed: true };
-            }
-            return sub;
-          });
-          return { ...topic, subtopics: updatedSubtopics, completed: updatedSubtopics.every(st => st.completed) };
-        }
-        return topic;
-      });
+    if (hasClickedNextButton && currentTopic && currentSubtopic) {
+      let newTopics = topics;
+      const subIdx = getCurrentSubtopicIndex(currentTopic);
+      if (hasRunCode) {
+        newTopics = topics.map((topic) => {
+          if (topic.id === currentTopic.id) {
+            const updatedSubtopics = topic.subtopics.map((sub, index) => {
+              if (index === subIdx) {
+                return { ...sub, completed: true };
+              }
+              return sub;
+            });
+            return { ...topic, subtopics: updatedSubtopics, completed: updatedSubtopics.every(st => st.completed) };
+          }
+          return topic;
+        });
 
-      setTopics(newTopics);
-      setHasRunCode(false);
+        setTopics(newTopics);
+        setHasRunCode(false);
+      }
       setHasClickedNextButton(false);
       switchToNextSubtopic(newTopics);
-    } else if (hasClickedNextButton && !hasRunCode) {
-      alert('You need one successful code run before going to next subtopic. Please run code once.');
-      setHasClickedNextButton(false);
     }
-  }, [hasRunCode, hasClickedNextButton, currentTopic, currentSubtopicIndex, topics]);
+
+    updateAllTopicsInLocalStorage(topics);
+  }, [hasRunCode, hasClickedNextButton, currentTopic, currentSubtopic, topics]);
 
   const switchToNextSubtopic = (topics: Topic[]) => {
-    if (currentTopic && currentSubtopicIndex !== null) {
-      const nextSubtopicIndex = currentSubtopicIndex + 1;
+    console.log("currentTopic in switchToNextSubtopic", currentTopic);
+    let nextSubtopic;
+    if (currentTopic) {
+      const currentIdx = getCurrentSubtopicIndex(currentTopic);
+      const nextSubtopicIndex = currentIdx + 1;
 
       if (nextSubtopicIndex < currentTopic.subtopics.length) {
-        const nextSubtopic = currentTopic.subtopics[nextSubtopicIndex];
-        setCurrentSubtopic(nextSubtopic.name);
-        setCurrentSubtopicIndex(nextSubtopicIndex);
-        localStorage.setItem('currentSubtopic', nextSubtopic.name);
+        nextSubtopic = currentTopic.subtopics[nextSubtopicIndex];
+        posthog.capture('module_changed' , {
+          button : 'next',
+          from : currentSubtopic,
+          to : nextSubtopic.name
+          
+        });
+
+        setCurrentSubtopic(nextSubtopic.name); // Update currentSubtopic here as wellt
       } else {
         const nextTopicIndex = topics.findIndex((t) => t.id === currentTopic.id) + 1;
+        console.log("finding new topic", topics[nextTopicIndex]);
         if (nextTopicIndex < topics.length) {
           const nextTopic = topics[nextTopicIndex];
-          const firstSubtopic = nextTopic.subtopics.find((st) => !st.completed);
+          const firstSubtopic = nextTopic.subtopics[0];
+          console.log("new subtopic 1", firstSubtopic);
           if (firstSubtopic) {
+            console.log("new subtopic", currentSubtopic);
             setCurrentSubtopic(firstSubtopic.name);
+            posthog.capture('module_changed' , {
+              button : 'next',
+              from : currentSubtopic,
+              to : firstSubtopic.name
+              
+            });
+            
             setCurrentTopic(nextTopic);
-            setCurrentSubtopicIndex(0);
             setCurrentTopicIndex(nextTopicIndex);
             setcurrentindex(nextTopicIndex);// Update currentTopicIndex here
-            localStorage.setItem('currentSubtopic', firstSubtopic.name);
           }
         }
       }
-      updateAllTopicsInLocalStorage(topics);
+      
+      
       setShouldClearCode(true);
     }
   };
@@ -169,6 +200,10 @@ const Syllabus: React.FC = () => {
     }
   };
   const toggleTopic = (id: number) => {
+    
+      posthog.capture('course_menu_topic_clicked' , {
+        topic :topics.find((t) => t.id === id)?.name  
+      });
     if (expandedTopicId === id) {
       setExpandedTopicId(null);
       setDropdownPosition(null);
@@ -200,8 +235,57 @@ const Syllabus: React.FC = () => {
       setVisibleTopics(visibleTopics);
     }
   }, [topics, currentindex]);
-
-  const handleSubtopicClick = (subtopic: Subtopic) => {
+    // New arrow click handlers
+    const handleLeftArrowClick = () => {
+      // If no previous index recorded, store current value.
+      if (prevIndex === null && currentindex !== null) {
+        setPrevIndex(currentindex);
+      }
+      setcurrentindex((idx) => idx !== null ? Math.max(0, idx - 1) : 0);
+      if (arrowTimeoutRef.current) {
+        clearTimeout(arrowTimeoutRef.current);
+      }
+      arrowTimeoutRef.current = setTimeout(() => {
+        if (prevIndex !== null) {
+          setcurrentindex(prevIndex);
+          setPrevIndex(null);
+        }
+      }, 7000); // Reset after 3 seconds of inactivity
+      const currentLanguage = localStorage.getItem('language');
+      posthog.capture('course_menu_clicked' , {
+        Language : currentLanguage  
+      });
+    };
+  
+    const handleRightArrowClick = () => {
+      if (prevIndex === null && currentindex !== null) {
+        setPrevIndex(currentindex);
+      }
+      setcurrentindex((idx) => idx !== null ? Math.min(topics.length - 1, idx + 1) : 0);
+      if (arrowTimeoutRef.current) {
+        clearTimeout(arrowTimeoutRef.current);
+      }
+      arrowTimeoutRef.current = setTimeout(() => {
+        if (prevIndex !== null) {
+          setcurrentindex(prevIndex);
+          setPrevIndex(null);
+        }
+      }, 7000); // Reset after 3 seconds
+      const currentLanguage = localStorage.getItem('language');
+      posthog.capture('course_menu_clicked' , {
+        Language : currentLanguage  
+      });
+    };
+  const handleSubtopicClick = (subtopic: Subtopic, topic: Topic) => {
+    if (arrowTimeoutRef.current) {
+      clearTimeout(arrowTimeoutRef.current);
+      setPrevIndex(null);
+    }
+    setCurrentTopic(topic);
+    console.log("current topic in subtopic", topic);
+    setCurrentTopicIndex(topics.indexOf(topic));
+    
+    setcurrentindex(topics.indexOf(topic));
     if (subtopic.completed) {
       setCurrentSubtopic(subtopic.name);
       localStorage.setItem('currentSubtopic', subtopic.name);
@@ -211,74 +295,106 @@ const Syllabus: React.FC = () => {
       if (clickedTopic) {
         const clickedSubtopicIndex = clickedTopic.subtopics.indexOf(subtopic);
         if (clickedSubtopicIndex > 0) {
-          const previousSubtopic = clickedTopic.subtopics[clickedSubtopicIndex - 1];
-          if (previousSubtopic.completed) {
+         
             setCurrentSubtopic(subtopic.name);
             localStorage.setItem('currentSubtopic', subtopic.name);
-          }
+          
         } else {
           // Handle the case when the clicked subtopic is the first one
           const clickedTopicindex = topics.indexOf(clickedTopic);;
           const prevtopicindex = clickedTopicindex - 1;
           if (prevtopicindex >= 0) {
-            const prevTopic = topics[prevtopicindex];
-            const prevSubtopic = prevTopic.subtopics[prevTopic.subtopics.length - 1];
-            if (prevSubtopic.completed) {
+            
               setCurrentSubtopic(subtopic.name);
               localStorage.setItem('currentSubtopic', subtopic.name);
-            }
           }
         }
       }
     }
-
-
   };
   console.log("currentindex = ", currentindex);
   return (
     <div className={styles["syllabus-container"]}>
       <div className={styles["navigation-container"]}>
-        <button onClick={() => setcurrentindex(idx => Math.max(0, idx - 1))} disabled={currentindex === 0} className={styles.arrow}>
+        <button
+          onClick={handleLeftArrowClick}
+          disabled={currentindex === 0}
+          className={`${styles.arrow} ${styles["left-arrow"]}`}
+        >
           &#8592;
         </button>
-        <div className={styles["topics-row"]}>
-          {visibleTopics.map((topic, index) => (
-            <div
-              key={topic.id}
-              className={styles.topic}
-              ref={(ref) => topicRefs.current.set(topic.id, ref)}
-              style={{
-                fontWeight: topics.indexOf(topic) === currentTopicIndex ? 'bold' : 'normal',
-                color: topics.indexOf(topic) < currentTopicIndex ? 'green' : topics.indexOf(topic) > currentTopicIndex ? 'grey' : 'black',
-              }}
-            >
-              <div className={styles["topic-header"]} onClick={() => toggleTopic(topic.id)}>
-                <span>{topic.name}</span>
-                <div className={styles.icon}>{expandedTopicId === topic.id ? <ChevronDownIcon /> : <ChevronRightIcon />}</div>
-              </div>
-            </div>
-          ))}
+        <div className={styles["topics-wrapper"]}>
+          <div className={styles["topics-row"]}>
+            {visibleTopics.map((topic) => {
+              const isCurrent = currentTopic && currentTopic.id === topic.id;
+              const topicColor = isCurrent
+                ? "black"
+                : topic.completed
+                ? "green"
+                : topic.subtopics.some((st: Subtopic) => st.completed)
+                ? "black"
+                : "grey";
+              return (
+                <div
+                  key={topic.id}
+                  className={styles.topic}
+                  ref={(ref) => topicRefs.current.set(topic.id, ref)}
+                  style={{
+                    fontWeight: currentTopic && currentTopic.id === topic.id ? "bold" : "normal",
+                    color: topicColor,
+                  }}
+                >
+                  <div
+                    className={styles["topic-header"]}
+                    onClick={() => toggleTopic(topic.id)}
+                  >
+                    <span>{topic.name}</span>
+                    <div className={styles.icon}>
+                      {expandedTopicId === topic.id ? <ChevronDownIcon /> : <ChevronRightIcon />}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <button onClick={() => setcurrentindex(idx => Math.min(topics.length - 1, idx + 1))} disabled={currentindex === topics.length - 1} className={styles.arrow}>
+        <button
+          onClick={handleRightArrowClick}
+          disabled={currentindex === topics.length - 1}
+          className={`${styles.arrow} ${styles["right-arrow"]}`}
+        >
           &#8594;
         </button>
       </div>
-
       {expandedTopicId !== null && dropdownPosition && createPortal(
-        <div ref={popupRef} className={`${styles["dropdown-popup"]} ${expandedTopicId !== null ? 'show' : ''}`} style={{ top: dropdownPosition.top, left: dropdownPosition.left, position: "absolute" }}>
+        <div
+          ref={popupRef}
+          className={`${styles["dropdown-popup"]} ${expandedTopicId !== null ? 'show' : ''}`}
+          style={{ top: dropdownPosition.top, left: dropdownPosition.left, position: "absolute" }}
+        >
           <div className={styles.subtopics}>
-            {topics.find((topic) => topic.id === expandedTopicId)?.subtopics.map((subtopic, index) => (
-              <div key={subtopic.id} className={styles.subtopic} onClick={() => handleSubtopicClick(subtopic)}>
-                <input type="checkbox" checked={subtopic.completed} style={{ backgroundColor: subtopic.completed ? 'green' : 'transparent' }}/>
-                <span style={{
-                  color: subtopic.completed ? 'green' :
-                    (index > 0 && topics.find((topic) => topic.id === expandedTopicId)?.subtopics[index - 1].completed) ||
-                      (index === 0 && topics.findIndex((topic) => topic.id === expandedTopicId) > 0 && topics[topics.findIndex((topic) => topic.id === expandedTopicId) - 1].subtopics[topics[topics.findIndex((topic) => topic.id === expandedTopicId) - 1].subtopics.length - 1].completed) ||
-                      (index === 0 && topics.findIndex((topic) => topic.id === expandedTopicId) === 0)
-                      ? 'black' : 'grey'
-                }}>{subtopic.name}</span>
-              </div>
-            ))}
+            {(() => {
+              const currentTopicData = topics.find((topic: Topic) => topic.id === expandedTopicId);
+              const topicHasCompleted = currentTopicData ? currentTopicData.subtopics.some(st => st.completed) : false;
+              return currentTopicData?.subtopics.map((subtopic: Subtopic) => (
+                <div
+                  key={subtopic.id}
+                  className={styles.subtopic}
+                  onClick={() => handleSubtopicClick(subtopic, currentTopicData)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={subtopic.completed}
+                    style={{ backgroundColor: subtopic.completed ? 'green' : 'transparent' }}
+                  />
+                  <span style={{
+                    color: subtopic.completed ? 'green' : (topicHasCompleted ? 'black' : 'grey')
+                  }}>
+                    {subtopic.name}
+                  </span>
+                </div>
+              ));
+            })()}
           </div>
         </div>, document.body
       )}

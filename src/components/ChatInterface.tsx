@@ -9,6 +9,7 @@ import { useProgress } from '../context/AppContext';
 import useLocalStorage from '../services/localHook';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked'; // Ensure these are installed via npm or yarn
+import posthog from 'posthog-js';
 interface ChatInterfaceProps {
   code: string; // Function to get the current code from IDE
 
@@ -30,11 +31,12 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
 
   const username = localStorage.getItem('username');
   const { setShouldClearCode } = useAuth();
-
+  
+  const {currentSubtopic, setCurrentSubtopic} = useProgress();
 
   const { setHasClickedNextButton } = useProgress();
 
-
+  const {setCurrentTopic} = useProgress();
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -48,7 +50,7 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
     }
   }, [messages]);
 
-  const currentSubtopic = useLocalStorage('currentSubtopic');
+ 
 
 
   useEffect(() => {
@@ -66,7 +68,7 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
       // Clear messages state before fetching new messages
       setMessages([]);
 
-      const response = await getPastConversations();
+      const response = await getPastConversations(currentSubtopic);
 
       if (response.success) {
         let chats: Message[] = [];
@@ -197,74 +199,90 @@ const formatMessage = (message: string): string => {
 
   const handleSend = (message: string) => {
     handleSendMessage(message);
+    posthog.capture('user_asked_ai_through_chat' , {
+      user_message : message,
+      subtopic : currentSubtopic
+    });
+    
   };
 
 
   const handlePrevTopic = async () => {
     console.log("prev topic clicked");
-    const currentSubtopic = localStorage.getItem('currentSubtopic');
+    
     const topics = JSON.parse(localStorage.getItem('topics'));
     const currentTopic = topics.find((t) => t.subtopics.find((st) => st.name === currentSubtopic));
     const currentSubtopicIndex = currentTopic.subtopics.indexOf(currentTopic.subtopics.find((st) => st.name === currentSubtopic));
     if (currentSubtopicIndex > 0) {
       const previousSubtopic = currentTopic.subtopics[currentSubtopicIndex - 1];
-      if (previousSubtopic.completed) {
+      posthog.capture('module_changed' , {
+        button : 'Previous',
+        from : currentSubtopic,
+        to : previousSubtopic.name
+        
+      });
+      // if (previousSubtopic.completed) {
         setShouldClearCode(true);
         setMessages([]);
-        localStorage.setItem('currentSubtopic', previousSubtopic.name);
-      }
+        setCurrentSubtopic(previousSubtopic.name);
+      //}
     }
     else {
       const currentTopicindex = topics.indexOf(currentTopic);
       const prevtopicIndex = currentTopicindex - 1;
       const previousSubtopic = topics[prevtopicIndex].subtopics[topics[prevtopicIndex].subtopics.length - 1];
-      if (previousSubtopic.completed) {
+      //if (previousSubtopic.completed) {
+        posthog.capture('module_changed' , {
+          button : 'Previous',
+          from : currentSubtopic,
+          to : previousSubtopic.name
+          
+        });
+        setCurrentTopic(topics[prevtopicIndex]);
         setShouldClearCode(true);
         setMessages([]);
-        localStorage.setItem('currentSubtopic', previousSubtopic.name);
-      }
+        setCurrentSubtopic(previousSubtopic.name);
+      //}
     }
   };
 
   const handleNextTopic = async () => {
-    const currentSubtopic = localStorage.getItem('currentSubtopic');
-    const topics = JSON.parse(localStorage.getItem('topics'));
-    const currentTopic = topics.find((t) => t.subtopics.find((st) => st.name === currentSubtopic));
-    const currentSubtopicIndex = currentTopic.subtopics.indexOf(currentTopic.subtopics.find((st) => st.name === currentSubtopic));
-    
-    if (currentTopic.subtopics[currentSubtopicIndex].completed) {
-      
-    
-      // Find the next subtopic
-      if (currentSubtopicIndex < currentTopic.subtopics.length - 1) {
-        // Next subtopic is within the same topic
-        const nextSubtopic = currentTopic.subtopics[currentSubtopicIndex + 1];
-        setMessages([]);
-        localStorage.setItem('currentSubtopic', nextSubtopic.name);
-        setShouldClearCode(true);
-      } else {
-        // Current subtopic is the last one in the topic, move to next topic
-        const nextTopicIndex = topics.indexOf(currentTopic) + 1;
-        if (nextTopicIndex < topics.length) {
-          const nextTopic = topics[nextTopicIndex];
-          const nextSubtopic = nextTopic.subtopics[0]; // First subtopic of the next topic    
-          setMessages([]);
-          localStorage.setItem('currentSubtopic', nextSubtopic.name);
-          setShouldClearCode(true);
-        }
-      }
-    }
-    else {
+    // console.log("currentsubtopic", currentSubtopic);
+    // const topics = JSON.parse(localStorage.getItem('topics'));
+    // const currentTopic = topics.find((t) => t.subtopics.find((st) => st.name === currentSubtopic));
+    // const currentSubtopicIndex = currentTopic.subtopics.indexOf(currentTopic.subtopics.find((st) => st.name === currentSubtopic));
+    //   // Find the next subtopic
+    //   if (currentSubtopicIndex < currentTopic.subtopics.length - 1) {
+    //     // Next subtopic is within the same topic
+    //     const nextSubtopic = currentTopic.subtopics[currentSubtopicIndex + 1];
+    //     setMessages([]);
+    //     setCurrentSubtopic(nextSubtopic.name);
+    //     setShouldClearCode(true);
+    //   } else {
+    //     // Current subtopic is the last one in the topic, move to next topic
+    //     const nextTopicIndex = topics.indexOf(currentTopic) + 1;
+    //     if (nextTopicIndex < topics.length) {
+    //       const nextTopic = topics[nextTopicIndex];
+    //       const nextSubtopic = nextTopic.subtopics[0]; // First subtopic of the next topic    
+    //       setMessages([]);
+    //       setCurrentSubtopic(nextSubtopic.name);
+    //       setShouldClearCode(true);
+    //     }
+    //   }
+    setMessages([]);
       setHasClickedNextButton(true);
-      
-    }
   };
+  
 
 
   const handleButtonClick = async (buttonText: string) => {
     if(buttonText === 'I want to practice another example'){ // Handle button click event
       setShouldClearCode(true);
     }
+    posthog.capture('user_asked_ai_through_button' , {
+      user_message : buttonText,
+      subtopic : currentSubtopic
+    });
     handleSendMessage(buttonText); // Send the message with code
   };
 

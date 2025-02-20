@@ -79,8 +79,8 @@ const HomePage: React.FC = () => {
       } else {
         throw new Error("Invalid response from server");
       }
-      posthog.identify(user.email , {username : user.displayName });
-      posthog.capture('user_signed_up', { username: user.displayName });
+      posthog.identify(user.email , {username : user.displayName , email : user.email});
+      posthog.capture('user_signed_up', { username: user.displayName , email: user.email });
     }  catch (error: any) {
       console.error("Authentication error:", error);
       setErrorMessage(error.response?.data?.message || "Failed to authenticate.");

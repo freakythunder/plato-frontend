@@ -4,7 +4,7 @@ import styles from '../Styles/IDE.module.css';
 import { executeCode } from '../services/codeService';
 import { useAuth } from '../context/AuthContext';
 import { useProgress } from '../context/AppContext';
-
+import posthog from 'posthog-js';
 interface IDEProps {
   height: number;
   onRun: (output: string) => void;
@@ -119,8 +119,12 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun, onWebSocketCreate }, 
       console.log("Execution result received:", result);
       console.log("output: ", result.data.output);
       onRun(result.data.output);
+      posthog.capture('code_run_clicked' , {
+        error : result.data.executionSuccess
+      });
       if (result.data.executionSuccess) {
         setHasRunCode(true);
+        
         console.log("Execution successful; setHasRunCode updated.");
       }
     } catch (error) {
