@@ -1,6 +1,6 @@
 // src/services/chatService.ts
 import api from './api';
-
+import { useProgress } from '../context/AppContext';
 // src/services/chatService.tsx
 
 // src/services/chatService.tsx
@@ -42,9 +42,10 @@ export const sendMessage = async (message: string): Promise<SingleMessageRespons
     throw error;
   }
 };
-export const getPastConversations = async (): Promise<PastConversationsResponse> => {
+export const getPastConversations = async (currentSubtopic: string): Promise<PastConversationsResponse> => {
+  
   try {
-    const subtopicId = localStorage.getItem('currentSubtopic');
+    const subtopicId = currentSubtopic;
     const language = localStorage.getItem('language');
     const backendlanguage = language.toLowerCase();
     const response = await api.get('/chat/past', {

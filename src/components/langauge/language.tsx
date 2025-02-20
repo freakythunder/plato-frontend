@@ -84,24 +84,24 @@ window.addEventListener('beforeunload', (event) => {
 });
 
 
-// Modified interval implementation
+// Modified interval implementation in language.tsx
 useEffect(() => {
-  // Global interval flag
-  (window as any)._autoSaveInterval = (window as any)._autoSaveInterval || setInterval(() => {
-    const topics = JSON.parse(localStorage.getItem('allTopics') || '[]');
-    if (topics.length > 0) {
-      
-      sendTopicsToBackend(topics);
-    }
-  }, 5000);
+  // Only set the interval if it hasn’t been set already
+  if (!(window as any)._autoSaveInterval) {
+    (window as any)._autoSaveInterval = setInterval(() => {
+      const topics = JSON.parse(localStorage.getItem('allTopics') || '[]');
+      if (topics.length > 0) {
+        sendTopicsToBackend(topics);
+      }
+    }, 5000);
+  }
 
-  // Cleanup only on full page unload
+  // Cleanup: clear the interval on component unmount.
   return () => {
-    window.addEventListener('beforeunload', () => {
-      clearInterval((window as any)._autoSaveInterval);
-    });
+    clearInterval((window as any)._autoSaveInterval);
+    (window as any)._autoSaveInterval = null;
   };
-}, []); // Empty dependency array ensures it runs once
+}, []); // Empty dependency array ensures it runs only once
 
   // Load initial data
   useEffect(() => {
