@@ -283,6 +283,7 @@ const Syllabus: React.FC = () => {
     }
     setCurrentTopic(topic);
     console.log("current topic in subtopic", topic);
+    console.log("current subtopic in subtopic", subtopic);
     setCurrentTopicIndex(topics.indexOf(topic));
     
     setcurrentindex(topics.indexOf(topic));
@@ -302,12 +303,12 @@ const Syllabus: React.FC = () => {
         } else {
           // Handle the case when the clicked subtopic is the first one
           const clickedTopicindex = topics.indexOf(clickedTopic);;
-          const prevtopicindex = clickedTopicindex - 1;
-          if (prevtopicindex >= 0) {
+          
+          
             
               setCurrentSubtopic(subtopic.name);
               localStorage.setItem('currentSubtopic', subtopic.name);
-          }
+          
         }
       }
     }
@@ -331,9 +332,9 @@ const Syllabus: React.FC = () => {
                 ? "black"
                 : topic.completed
                 ? "green"
-                : topic.subtopics.some((st: Subtopic) => st.completed)
-                ? "black"
-                : "grey";
+                :"black"; 
+                 
+                
               return (
                 <div
                   key={topic.id}
@@ -388,7 +389,7 @@ const Syllabus: React.FC = () => {
                     style={{ backgroundColor: subtopic.completed ? 'green' : 'transparent' }}
                   />
                   <span style={{
-                    color: subtopic.completed ? 'green' : (topicHasCompleted ? 'black' : 'grey')
+                    color: subtopic.completed ? 'green' :'black'
                   }}>
                     {subtopic.name}
                   </span>
