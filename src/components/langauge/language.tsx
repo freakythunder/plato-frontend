@@ -170,11 +170,11 @@ useEffect(() => {
       const courses = parsedTopics.map(topic => topic.language);
       setMyCourses(courses);
 
-      const others = ['Python', 'Java', 'JavaScript', 'C++']
+      const others = ['Python', 'Java', 'JavaScript', 'C++','DSA']
         .filter(lang => !courses.includes(lang));
       setOtherLanguages(others);
     } else {
-      setOtherLanguages(['Python', 'Java', 'JavaScript', 'C++']);
+      setOtherLanguages(['Python', 'Java', 'JavaScript', 'C++','DSA']);
     }
   }, []);
 
@@ -222,7 +222,7 @@ useEffect(() => {
       localStorage.setItem('allTopics', JSON.stringify(updatedAllTopics));
       updateCompletions(updatedAllTopics);
     }
-
+    
     localStorage.setItem('language', language);
 
     try {
@@ -268,13 +268,32 @@ useEffect(() => {
     }
   };
 
+  // New handler for DSA practice click
+  const handleDSAPracticeClick = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/dsa/practice`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      navigate('/practice');
+    } catch (error) {
+      console.error('Error initiating DSA practice:', error);
+    }
+  };
+
   // LanguageLogo component remains unchanged
   const LanguageLogo = ({ language }) => {
     const logoUrls = {
       Python: 'https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg',
       Java: 'https://upload.wikimedia.org/wikipedia/en/3/30/Java_programming_language_logo.svg',
       JavaScript: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png',
-      'C++': 'https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg'
+      'C++': 'https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg',
+      'DSA': 'https://cdn-icons-png.flaticon.com/512/2106/2106603.png' // Added DSA logo
     };
 
     return (
@@ -292,57 +311,69 @@ useEffect(() => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
-        {myCourses.length === 0 ? (
-          <div className={styles.welcomeMessage}>
-            <h1>Welcome to Plato, pick a language to get started!</h1>
-            <div className={styles.gridContainer}>
-              {['Python', 'Java', 'JavaScript', 'C++'].map(language => (
-                <div key={language} className={styles.languageCard}
-                  onClick={() => handleLanguageClick(language)}>
-                  <LanguageLogo language={language} />
-                  <h3 className={styles.cardTitle}>{language}</h3>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className={styles.header}>
-              <h1 className={styles.title}>My Courses</h1>
-            </div>
-            <div className={styles.gridContainer}>
-              {myCourses.map(course => (
-                <div key={course} className={styles.languageCard}
-                  onClick={() => handleLanguageClick(course)}>
-                  <LanguageLogo language={course} />
-                  <h3 className={styles.cardTitle}>Learning {course}</h3>
-                  <div className={styles.progressBar}>
-                    <div className={styles.progressFill}
-                      style={{ width: `${completions[course] ? completions[course].percentage : 0}%` }} />
-                  </div>
-                  <span className={styles.completionText}>
-                  {completions[course] ? `${completions[course].completed}/${completions[course].total} subtopics completed` : '0% Completed'}
-                  </span>
-                </div>
-              ))}
-            </div>
-            {otherLanguages.length > 0 && (
-              <div className={styles.footer}>
-                <p className={styles.footerText}>Want to start learning another language?</p>
+      <div className={styles.innerWrapper}>
+        <div className={styles.coursesContainer}>
+          <div className={styles.card}>
+            {myCourses.length === 0 ? (
+              <div className={styles.welcomeMessage}>
+                <h1>Welcome to Plato, pick a language to get started!</h1>
                 <div className={styles.gridContainer}>
-                  {otherLanguages.map(language => (
+                  {['Python', 'Java', 'JavaScript', 'C++','DSA'].map(language => (
                     <div key={language} className={styles.languageCard}
                       onClick={() => handleLanguageClick(language)}>
                       <LanguageLogo language={language} />
-                      <h3 className={styles.cardTitle}>{language}</h3>  
+                      <h3 className={styles.cardTitle}>{language}</h3>
                     </div>
                   ))}
                 </div>
               </div>
+            ) : (
+              <>
+                <div className={styles.header}>
+                  <h1 className={styles.title}>My Courses</h1>
+                </div>
+                <div className={styles.gridContainer}>
+                  {myCourses.map(course => (
+                    <div key={course} className={styles.languageCard}
+                      onClick={() => handleLanguageClick(course)}>
+                      <LanguageLogo language={course} />
+                      <h3 className={styles.cardTitle}>Learning {course}</h3>
+                      <div className={styles.progressBar}>
+                        <div className={styles.progressFill}
+                          style={{ width: `${completions[course] ? completions[course].percentage : 0}%` }} />
+                      </div>
+                      <span className={styles.completionText}>
+                        {completions[course] ? `${completions[course].completed}/${completions[course].total} subtopics completed` : '0% Completed'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                {otherLanguages.length > 0 && (
+                  <div className={styles.footer}>
+                    <p className={styles.footerText}>Want to start learning another language?</p>
+                    <div className={styles.gridContainer}>
+                      {otherLanguages.map(language => (
+                        <div key={language} className={styles.languageCard}
+                          onClick={() => handleLanguageClick(language)}>
+                          <LanguageLogo language={language} />
+                          <h3 className={styles.cardTitle}>{language}</h3>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
+          </div>
+        </div>
+        <div className={styles.dsaContainer}>
+          <div className={styles.dsaCard} >
+            <LanguageLogo language="DSA" />
+            <h3 className={styles.cardTitle}>DSA Practice Arena</h3>
+            <p className={styles.dsaCardDescription}>Practice data structures and algorithms</p>
+            <div className={styles.comingSoonBadge}>Coming Soon</div>
+          </div>
+        </div>
       </div>
     </div>
   );

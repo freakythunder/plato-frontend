@@ -14,7 +14,7 @@
   }
   /* Fixed width wrapper for topics (250px gap) */
 .topics-wrapper {
-  width: 900px;
+  width: 950px;
   display: flex;
   align-items: center;
   justify-content: center;
