@@ -1,0 +1,94 @@
+/* src/Styles/IDE.module.css */
+.ideContainer {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height : 100%;
+  position: relative;
+  
+}
+.placeholderOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  color: gray;
+  padding: 10px;
+  font-size: 14px;
+  z-index: 1;
+  white-space: pre-wrap;
+  font-family: monospace;
+  pointer-events: none;
+}
+
+
+
+.editorContainer {
+  flex:20;
+  overflow: hidden;
+  
+}
+
+/* Rest of the styles remain the same */
+
+.buttonContainer {
+  width: auto; /* Adjust as needed */
+  max-width: 100%; /* Prevent overflowing */
+  padding: 10px;
+  display: flex;
+  justify-content: flex-end; /* Aligns button to the right */
+  background-color: transparent;
+  position: absolute;/* Ensure positioning context */
+  top: 0; /* Position it a bit lower from the top */
+  right: 10px; /* Position it to the right */
+  z-index: 20;/* Ensure it stays above other elements */
+}
+
+.runButton {
+  background-color: #0e639c;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+
+
+.runButton:hover {
+  background-color: #1177bb;
+}
+
+.runButton:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+/* Add a subtle box shadow to the IDE container */
+.ideContainer {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Style the scrollbar */
+.editorContainer ::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.editorContainer ::-webkit-scrollbar-thumb {
+  background-color: #424242;
+  border-radius: 7px;
+  border: 3px solid #1e1e1e;
+}
+
+.editorContainer ::-webkit-scrollbar-thumb:hover {
+  background-color: #4f4f4f;
+}
+
+.editorContainer ::-webkit-scrollbar-corner {
+  background-color: #1e1e1e;
+}

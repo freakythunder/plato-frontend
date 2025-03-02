@@ -1,0 +1,419 @@
+/* Scrollbar styling */
+.chatContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #f0f4f8;
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Sometype Mono', monospace; 
+}
+
+.messagesContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.messageWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 8px;
+}
+
+.userMessage{
+  padding: 8px 12px;
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(0,  0, 0, 0.1);
+  background-color: rgb(198 219 188);
+}
+.aiMessage {
+  padding: 8px 12px;
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(0,  0, 0, 0.1);
+}
+.userMessage, 
+.aiMessage {
+  font-family: 'Sometype Mono', monospace; /* Ensure messages use the new font */
+}
+
+.userMessage {
+  background-color: rgb(198 219 188);
+  color: rgb(0, 0, 0);
+  align-self: flex-end;
+}
+
+.timestamp {
+  font-size: 0.8em;
+  color: #0c0808;
+  margin-top: 4px;
+}
+
+.errorMessage {
+  color: red;
+  text-align: center;
+  margin: 8px 0;
+}
+/* src/Styles/ChatInterface.module.css */
+
+.messagesContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messagesContainer::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+/* Media query for mobile responsiveness */
+@media (max-width: 768px) {
+  .userMessage, 
+  .aiMessage {
+    max-width: 90%;
+  }
+
+  .messagesContainer {
+    padding: 12px;
+  }
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* src/Styles/ChatInterface.module.css */
+
+.aiResponseContainer {
+  background-color: #f9fafb; /* Light background for the container */
+  padding: 20px;
+  border-radius: 10px;
+  margin: 15px 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  font-family: 'Sometype Mono', monospace; /* Font for the AI response */
+  position: relative; /* For better positioning of elements */
+}
+
+.aiResponseHeader {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-top: 10px;
+}
+
+.aiResponseText {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #4b5563;
+  margin: 10px 0;
+}
+
+.bulletPoints {
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+.bulletPoint {
+  color: #374151;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.codeBlock {
+  background-color: #1e293b; /* Black background for the code block */
+  color: #f8fafc; /* White text for contrast */
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow-x: auto; /* Ensures code blocks scroll horizontally if needed */
+}
+
+.inlineCode {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.challengePrompt {
+  background-color: #dbeafe; /* Light blue background for challenges */
+  color: #1e40af; /* Dark blue text for emphasis */
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  font-weight: 500;
+}
+
+.hint {
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 10px;
+  border-left: 4px solid #f59e0b;
+  border-radius: 4px;
+  margin-top: 15px;
+  font-size: 0.95rem;
+}
+
+.timestamp {
+  font-size: 0.85rem;
+  color: #9ca3af; /* Subtle grey for the timestamp */
+  text-align: left;
+  margin-top: 15px;
+  font-style: italic;
+}
+.challengePrompt {
+  background-color: #dbeafe; /* Light blue background */
+  color: #1e40af; /* Dark blue text */
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-weight: 500;
+  border: 1px solid #93c5fd; /* Slight border for definition */
+}
+
+.explanationBox {
+  background-color: #d1fae5; /* Light green background */
+  color: #065f46; /* Dark green text */
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-weight: 500;
+  border: 1px solid #6ee7b7; /* Slight border for definition */
+}
+
+.hint {
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 10px;
+  border-left: 4px solid #f59e0b;
+  border-radius: 4px;
+  margin-top: 15px;
+  font-size: 0.95rem;
+}
+
+
+
+/* src/Styles/ChatInterface.module.css */
+.buttonSection {
+  display: flex;
+  flex-direction: row; /* Initially display buttons in a row */
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px; /* Reduced padding */
+  background-color: #ffffff;
+  border-top: 1px solid #e0e0e0;
+}
+
+.buttonRow {
+  display: flex;
+  justify-content: flex-start;
+  gap: 4px; /* Reduced gap */
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 200px;
+}
+
+@media (max-width: 600px) {
+  .buttonRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.customButton {
+  background-color: transparent;
+  border: 2px solid #4caf50;
+  color: #4caf50;
+  padding: 2px 8px; /* Significantly reduced padding */
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  white-space: nowrap;
+  font-family: 'IBM Plex Sans' , monospace;
+}
+
+.customButton:hover {
+  background-color: #4caf50;
+  color: white;
+}
+
+.customButton:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.7);
+}
+
+.button1 {
+  flex: 0 0 35%; 
+}
+
+.button2 {
+  flex: 0 0 35%; 
+}
+
+.button3 {
+  flex: 0 0 20%; 
+}
+
+.button4 {
+  flex: 0 0 40%; 
+}
+
+.navButton {
+  background-color: #4CAF50; 
+  border: none;
+  color: #fff; 
+  padding: 8px 16px; 
+  font-size: 16px; 
+  font-weight: bold;
+  text-align: center;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  white-space: nowrap; 
+  font-family: 'IBM Plex Sans', monospace;
+  flex: 0 0 auto; 
+  margin: 0 8px 5px 8px; /* Add 5px margin bottom */ 
+}
+
+.navButton:hover {
+  background-color: #3e8e41; 
+  color: #fff; 
+}
+
+.navbuttonrow {
+  display: flex; 
+  justify-content: space-between; 
+  gap: 8px; 
+  flex-wrap: wrap; 
+  flex: 1; 
+  min-width: 200px; 
+  height: 40px;
+  flex: 0 0 auto;
+  padding: 8px; 
+}
+
+.disabledButton {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.aiResponseHeader {
+  color: #4a4a4a;
+  margin-top: 1.2em;
+  margin-bottom: 0.8em;
+  font-weight: 600;
+}
+
+.orderedList {
+  padding-left: 1.5em;
+  margin: 0.75em 0;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.markdownTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.tableHeader {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+.tableRow:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.tableHeadCell, .tableCell {
+  padding: 0.5em 0.75em;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.markdownLink {
+  color: #0077cc;
+  text-decoration: none;
+}
+
+.markdownLink:hover {
+  text-decoration: underline;
+}
+
+.markdownImage {
+  max-width: 100%;
+  height: auto;
+  margin: 1em 0;
+}
+
+.codeBlock {
+  margin: 1em 0;
+  padding: 1em;
+  border-radius: 4px;
+  overflow-x: auto;
+  background-color: #f6f8fa; /* Light gray background instead of black */
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+  border: 1px solid #ddd;
+}
+
+.inlineCode {
+  padding: 0.1em 0.4em;
+  background-color: #f5f5f5;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  color: #030904; /* Pinkish color for better visibility */
+  font-weight: 600; /* Make it bold */
+  font-size: 0.9em;
+  border: none; /* No border for inline code */
+}
+
+/* Special styling for plain code blocks without language */
+.plainCodeBlock {
+  background-color: #f5f5f5;
+  padding: 0.75em;
+  margin: 1em 0;
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace;
+  color: #333;
+  font-weight: 500;
+  border-left: 3px solid #d63384;
+  overflow-x: auto;
+}
