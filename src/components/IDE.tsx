@@ -45,7 +45,11 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun, onWebSocketCreate }, 
   }));
 
   const getInitialLanguage = () => {
+<<<<<<< HEAD
     const stored = localStorage.getItem('language') || 'javascript';
+=======
+    const stored = localStorage.getItem('language');
+>>>>>>> feature-practice-arena-frontend
     if(stored === 'DSA') {
       return 'cpp'; 
     }
@@ -203,4 +207,8 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun, onWebSocketCreate }, 
   );
 });
 
+<<<<<<< HEAD
 export default IDE;
+=======
+export default IDE;
+>>>>>>> feature-practice-arena-frontend

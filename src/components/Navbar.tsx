@@ -69,7 +69,11 @@ const Navbar: React.FC = () => {
 
     posthog.reset(true);
   };
+<<<<<<< HEAD
 
+=======
+  const topicsPresent = localStorage.getItem('topics') === null;
+>>>>>>> feature-practice-arena-frontend
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -81,7 +85,11 @@ const Navbar: React.FC = () => {
       <div className={styles.title}>plato</div>
 
       <div className={styles.syllabus}>
+<<<<<<< HEAD
         {location.pathname !== '/home' && <Syllabus />}
+=======
+      {(!topicsPresent && (location.pathname !== '/home' && location.pathname!=='/practice' ))&& <Syllabus />}
+>>>>>>> feature-practice-arena-frontend
       </div>
 
       <div className={styles.navLinks} >

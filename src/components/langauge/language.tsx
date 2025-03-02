@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import styles from './language.module.css';
 import { useNavigate } from 'react-router-dom';
+<<<<<<< HEAD
 import posthog from 'posthog-js'
+=======
+import posthog from 'posthog-js';
+import { useProgress } from '../../context/AppContext';
+>>>>>>> feature-practice-arena-frontend
 posthog.init('phc_SkoWOGNlQvwgXkAqlKWmYT6l0JStbH2Dpeh5dtY1b2N', { api_host: 'https://us.i.posthog.com' })
 
 const calculateCompletion = (topics) => {
@@ -28,7 +33,11 @@ const Language: React.FC = () => {
   const [myCourses, setMyCourses] = useState([]);
   const [otherLanguages, setOtherLanguages] = useState([]);
   const [completions, setCompletions] = useState({});
+<<<<<<< HEAD
  
+=======
+  const {setAllProblemSets} = useProgress();
+>>>>>>> feature-practice-arena-frontend
 
 // Track latest allTopics state using ref
 const allTopicsRef = React.useRef(allTopics);
@@ -93,7 +102,11 @@ useEffect(() => {
       if (topics.length > 0) {
         sendTopicsToBackend(topics);
       }
+<<<<<<< HEAD
     }, 5000);
+=======
+    }, 20000);
+>>>>>>> feature-practice-arena-frontend
   }
 
   // Cleanup: clear the interval on component unmount.
@@ -149,8 +162,14 @@ useEffect(() => {
         }
       }
       else {
+<<<<<<< HEAD
         console.warn('[Initial Load] Stored language not found in allTopics');
         const newLanguageEntry = {
+=======
+        if(storedLanguage !== 'DSA_Practice'){
+          console.warn('[Initial Load] Stored language not found in allTopics');
+          const newLanguageEntry = {
+>>>>>>> feature-practice-arena-frontend
           language: storedLanguage,
           topics: currentTopics,
         };
@@ -158,6 +177,11 @@ useEffect(() => {
         // Add to parsedTopics and update storage
         parsedTopics = [...parsedTopics, newLanguageEntry];
         localStorage.setItem('allTopics', JSON.stringify(parsedTopics));
+<<<<<<< HEAD
+=======
+        }
+        
+>>>>>>> feature-practice-arena-frontend
         
       }
     }
@@ -208,12 +232,21 @@ useEffect(() => {
     const storedLanguage = localStorage.getItem('language');
     
     if (storedLanguage === language) {
+<<<<<<< HEAD
       navigate('/main');
       return;
     }
 
     // Update allTopics with current progress before switching
     if (storedLanguage) {
+=======
+      navigate('/main' , {state :{refresh : true}});
+      return;
+    }
+
+    // Update allTopics with current progress before switching 
+    if (storedLanguage && storedLanguage !== 'DSA_Practice') {
+>>>>>>> feature-practice-arena-frontend
       const currentTopics = JSON.parse(localStorage.getItem('topics')) || [];
       const updatedAllTopics = allTopics.map(topic =>
         topic.language === storedLanguage ? { ...topic, topics: currentTopics } : topic
@@ -262,7 +295,11 @@ useEffect(() => {
           }
         }
       }
+<<<<<<< HEAD
       navigate('/main');
+=======
+      navigate('/main' , {state :{refresh : true}});
+>>>>>>> feature-practice-arena-frontend
     } catch (error) {
       console.error('Error:', error);
     }
@@ -272,14 +309,35 @@ useEffect(() => {
   const handleDSAPracticeClick = async () => {
     try {
       const token = localStorage.getItem("token");
+<<<<<<< HEAD
       const response = await fetch(`${process.env.REACT_APP_API_URL}/dsa/practice`, {
         method: 'POST',
+=======
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/dsa/allproblemsets`, {
+        method: 'GET',
+>>>>>>> feature-practice-arena-frontend
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
+<<<<<<< HEAD
       
+=======
+      const problemset = await response.json();
+      const allproblemset = problemset.data;
+      setAllProblemSets(allproblemset);
+      const storedLanguage = localStorage.getItem('language');
+      const currentTopics = JSON.parse(localStorage.getItem('topics')) || [];
+      const updatedAllTopics = allTopics.map(topic =>
+        topic.language === storedLanguage ? { ...topic, topics: currentTopics } : topic
+      );
+      setAllTopics(updatedAllTopics);
+      localStorage.setItem('allTopics', JSON.stringify(updatedAllTopics));
+      updateCompletions(updatedAllTopics);
+      
+      localStorage.removeItem('topics');
+>>>>>>> feature-practice-arena-frontend
       navigate('/practice');
     } catch (error) {
       console.error('Error initiating DSA practice:', error);
@@ -366,7 +424,11 @@ useEffect(() => {
             )}
           </div>
         </div>
+<<<<<<< HEAD
         <div className={styles.dsaContainer}>
+=======
+        <div className={styles.dsaContainer} onClick={handleDSAPracticeClick}>
+>>>>>>> feature-practice-arena-frontend
           <div className={styles.dsaCard} >
             <LanguageLogo language="DSA" />
             <h3 className={styles.cardTitle}>DSA Practice Arena</h3>

@@ -14,7 +14,11 @@ interface ExecutionResult {
 export const executeCode = (code: string): ExecutionResult => {
   const sessionId = uuidv4();
   let language = localStorage.getItem('language') || 'python';
+<<<<<<< HEAD
   if(language === 'DSA') {
+=======
+  if(language === 'DSA' || language === 'DSA_Practice') {
+>>>>>>> feature-practice-arena-frontend
     language = 'c++';  // DSA is not a valid language for the code executor
   }
   const lowercaselanguage = language.toLowerCase();

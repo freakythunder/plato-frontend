@@ -10,6 +10,11 @@ import useLocalStorage from '../services/localHook';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked'; // Ensure these are installed via npm or yarn
 import posthog from 'posthog-js';
+<<<<<<< HEAD
+=======
+import { useLocation } from 'react-router-dom';
+
+>>>>>>> feature-practice-arena-frontend
 interface ChatInterfaceProps {
   code: string; // Function to get the current code from IDE
 
@@ -21,6 +26,10 @@ export interface ChatInterfaceRef {
 }
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> feature-practice-arena-frontend
 const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }, ref) => {
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -28,15 +37,36 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+<<<<<<< HEAD
+=======
+  // Add check for refresh flag; reload only once using localStorage flag.
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.refresh && !localStorage.getItem("alreadyRefreshed")) {
+      localStorage.setItem("alreadyRefreshed", "true");
+      window.location.reload();
+    } else {
+      localStorage.removeItem("alreadyRefreshed");
+    }
+  }, [location.state]);
+>>>>>>> feature-practice-arena-frontend
 
   const username = localStorage.getItem('username');
   const { setShouldClearCode } = useAuth();
   
+<<<<<<< HEAD
   const {currentSubtopic, setCurrentSubtopic} = useProgress();
+=======
+  const {currentSubtopic, setCurrentSubtopic, practiceMode, prompt: globalPrompt, setPrompt: clearGlobalPrompt, setPracticeMode} = useProgress();
+>>>>>>> feature-practice-arena-frontend
 
   const { setHasClickedNextButton } = useProgress();
 
   const {setCurrentTopic} = useProgress();
+<<<<<<< HEAD
+=======
+  
+>>>>>>> feature-practice-arena-frontend
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -52,15 +82,42 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
 
  
 
+<<<<<<< HEAD
 
   useEffect(() => {
 
     if (currentSubtopic) {
+=======
+  // Add a ref to track message fetch sessions
+const messageFetchTokenRef = useRef<number>(0);
+  useEffect(() => {
+
+    if (currentSubtopic) {
+      // When subtopic changes, cancel any ongoing message fetch by updating token and clear messages.
+      messageFetchTokenRef.current++;
+>>>>>>> feature-practice-arena-frontend
       setMessages([]);
       loadPastConversations();
     }
   }, [currentSubtopic]);
+<<<<<<< HEAD
 
+=======
+  
+  useEffect(() => {
+    if (practiceMode && globalPrompt) {
+      setMessages([]);
+      loadPastConversations();
+      if (globalPrompt !== "don't send handlsend") {
+        setTimeout(() => {
+          handleSendMessage(globalPrompt);
+        }, 200);
+      }
+      clearGlobalPrompt('');
+      console.log("currentSubtopic", currentSubtopic);
+    }
+  }, [practiceMode, globalPrompt, location.pathname]);
+>>>>>>> feature-practice-arena-frontend
   const loadPastConversations = async () => {
     try {
 
@@ -107,8 +164,11 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
 
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> feature-practice-arena-frontend
 const handleSendMessage = async (message: string) => {
   if (!message.trim() || isLoading) return;
 
@@ -125,6 +185,12 @@ const handleSendMessage = async (message: string) => {
 
   setMessages(prev => [...prev, newUserMessage]);
 
+<<<<<<< HEAD
+=======
+  // Increment token for this fetch session and capture it.
+  const token = ++messageFetchTokenRef.current;
+
+>>>>>>> feature-practice-arena-frontend
   try {
     let backendMessage = message;
 
@@ -149,6 +215,12 @@ const handleSendMessage = async (message: string) => {
     let fullResponse = "";
 
     while (true) {
+<<<<<<< HEAD
+=======
+      // If subtopic has changed, stop updating messages.
+      if (token !== messageFetchTokenRef.current) break;
+
+>>>>>>> feature-practice-arena-frontend
       const { done, value } = await reader.read();
       if (done) break;
 
@@ -156,6 +228,7 @@ const handleSendMessage = async (message: string) => {
       buffer += chunk;
       fullResponse += chunk;
 
+<<<<<<< HEAD
       setMessages((prev) =>
         prev.map((msg) =>
           msg._id === newUserMessage._id
@@ -176,11 +249,43 @@ const handleSendMessage = async (message: string) => {
           : msg
       )
     );
+=======
+      if (token === messageFetchTokenRef.current) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === newUserMessage._id
+              ? { ...msg, aiResponse: fullResponse }
+              : msg
+          )
+        );
+
+        // Scroll to bottom after each chunk update
+        scrollToBottom();
+      }
+    }
+
+    // Save full response on completion
+    if (token === messageFetchTokenRef.current) {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === newUserMessage._id
+            ? { ...msg, aiResponse: fullResponse.trim() }
+            : msg
+        )
+      );
+    }
+>>>>>>> feature-practice-arena-frontend
   } catch (err) {
     console.error("Error sending message:", err);
     setError("Failed to send message");
   } finally {
+<<<<<<< HEAD
     setIsLoading(false);
+=======
+    if (token === messageFetchTokenRef.current) {
+      setIsLoading(false);
+    }
+>>>>>>> feature-practice-arena-frontend
   }
 };
 
@@ -206,8 +311,29 @@ const formatMessage = (message: string): string => {
     
   };
 
+<<<<<<< HEAD
 
   const handlePrevTopic = async () => {
+=======
+  // Add this state to check if topics exist
+  const [topicsExist, setTopicsExist] = useState(false);
+  
+  // Improve the check for topics in localStorage
+  useEffect(() => {
+    const topics = localStorage.getItem('topics');
+    try {
+      const parsedTopics = topics ? JSON.parse(topics) : null;
+      setTopicsExist(!!parsedTopics && Array.isArray(parsedTopics) && parsedTopics.length > 0);
+      console.log("Topics exist:", !!parsedTopics && Array.isArray(parsedTopics) && parsedTopics.length > 0);
+    } catch (error) {
+      console.error("Error parsing topics from localStorage:", error);
+      setTopicsExist(false);
+    }
+  }, []);
+
+  const handlePrevTopic = async () => {
+    if (!topicsExist) return; // Don't proceed if topics don't exist
+>>>>>>> feature-practice-arena-frontend
     console.log("prev topic clicked");
     
     const topics = JSON.parse(localStorage.getItem('topics'));
@@ -247,6 +373,10 @@ const formatMessage = (message: string): string => {
   };
 
   const handleNextTopic = async () => {
+<<<<<<< HEAD
+=======
+    if (!topicsExist) return; // Don't proceed if topics don't exist
+>>>>>>> feature-practice-arena-frontend
     // console.log("currentsubtopic", currentSubtopic);
     // const topics = JSON.parse(localStorage.getItem('topics'));
     // const currentTopic = topics.find((t) => t.subtopics.find((st) => st.name === currentSubtopic));
@@ -262,7 +392,11 @@ const formatMessage = (message: string): string => {
     //     // Current subtopic is the last one in the topic, move to next topic
     //     const nextTopicIndex = topics.indexOf(currentTopic) + 1;
     //     if (nextTopicIndex < topics.length) {
+<<<<<<< HEAD
     //       const nextTopic = topics[nextTopicIndex];
+=======
+    //       const nextTopic = nextTopicIndex;
+>>>>>>> feature-practice-arena-frontend
     //       const nextSubtopic = nextTopic.subtopics[0]; // First subtopic of the next topic    
     //       setMessages([]);
     //       setCurrentSubtopic(nextSubtopic.name);
@@ -322,7 +456,16 @@ const formatMessage = (message: string): string => {
     });
   };
 
+<<<<<<< HEAD
 
+=======
+  // Add effect to disable practice mode if user leaves the main page
+  useEffect(() => {
+    if (location.pathname !== '/main' && practiceMode) {
+      setPracticeMode(false);
+    }
+  }, [location.pathname, practiceMode, setPracticeMode]);
+>>>>>>> feature-practice-arena-frontend
 
   return (
     <div className={styles.chatContainer}>
@@ -365,6 +508,7 @@ const formatMessage = (message: string): string => {
         </div>
       </div>
       <div className={styles.chatComponent}><Chat onSend={handleSend} /></div>
+<<<<<<< HEAD
       <div className={styles.navbuttonrow}>
         <button className={`${styles.navButton} ${styles.button1}`} onClick={handlePrevTopic}>
           Prev
@@ -373,11 +517,36 @@ const formatMessage = (message: string): string => {
           Next
         </button>
       </div>
+=======
+      
+      {/* Only render navigation buttons if topics exist */}
+      {topicsExist && (
+        <div className={styles.navbuttonrow}>
+          <button 
+            className={`${styles.navButton} ${styles.button1}`} 
+            onClick={handlePrevTopic}
+          >
+            Prev
+          </button>
+          <button 
+            className={`${styles.navButton} ${styles.button2}`} 
+            onClick={handleNextTopic}
+          >
+            Next
+          </button>
+        </div>
+      )}
+>>>>>>> feature-practice-arena-frontend
 
       {error && <div className={styles.errorMessage}>{error}</div>}
     </div>
   );
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> feature-practice-arena-frontend
 });
 
 
