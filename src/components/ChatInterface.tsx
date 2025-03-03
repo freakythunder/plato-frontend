@@ -129,11 +129,11 @@ const messageFetchTokenRef = useRef<number>(0);
 
       } else {
         console.error('Invalid response format:', response);
-        setError(response.message || 'Failed to load conversations');
+        
       }
     } catch (err) {
       console.error('Error loading conversations:', err);
-      setError('Failed to load past conversations');
+      
     }
   };
 
