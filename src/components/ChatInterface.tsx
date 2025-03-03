@@ -84,7 +84,7 @@ const messageFetchTokenRef = useRef<number>(0);
       if (globalPrompt !== "don't send handlsend") {
         setTimeout(() => {
           handleSendMessage(globalPrompt);
-        }, 200);
+        }, 1000);
         
       }
       clearGlobalPrompt('');

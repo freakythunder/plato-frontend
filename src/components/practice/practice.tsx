@@ -159,28 +159,15 @@ const Practice: React.FC = () => {
   };
 
   return (
-    <div className={styles.container} style={{ background: 'linear-gradient(135deg, #f9fff9, #e8f5e9)' }}>
+    <div className={styles.container}>
       <div className={styles.header}>
         <h2>Practice Problem Sets</h2>
         <button className={styles.createButton} onClick={() => setShowModal(true)}>+ Create</button>
       </div>
       <div className={styles.problemSetsContainerWrapper}>
-        <div className={styles.problemSetsContainer} style={{
-          height: '400px', 
-          overflowY: 'auto',
-          border: '1px solid #e0e0e0',
-          borderRadius: '8px',
-          padding: '15px',
-          backgroundColor: '#f1f8e9',
-          boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)'
-        }}>
+        <div className={styles.problemSetsContainer} style={{ height: '400px' }}>
           {allProblemSets && allProblemSets.length > 0 ? (
-            <table className={styles.problemSetTable} style={{
-              width: '100%',
-              borderCollapse: 'separate',
-              borderSpacing: '0',
-              fontSize: '14px'
-            }}>
+            <table className={styles.problemSetTable}>
               <thead>
                 <tr style={{ 
                   backgroundColor: '#4CAF50', 
@@ -231,7 +218,20 @@ const Practice: React.FC = () => {
               </tbody>
             </table>
           ) : (
-            <p style={{ textAlign: 'center', color: '#757575', padding: '20px 0' }}>No problem sets available.</p>
+            <div style={{ 
+              display: 'table',
+              width: '100%',
+              height: '100%',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                display: 'table-cell',
+                verticalAlign: 'middle',
+                padding: '20px'
+              }}>
+                <p style={{ color: '#757575' }}>No problem sets available.</p>
+              </div>
+            </div>
           )}
         </div>
       </div>
