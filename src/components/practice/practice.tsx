@@ -24,6 +24,7 @@ const Practice: React.FC = () => {
     } else {
       console.log('Generating problem set for:', currentPrompt);
       setGlobalPrompt(currentPrompt);
+      setPracticeMode(true);
       setAllProblemSets([...allProblemSets, currentPrompt]);
       const m = allProblemSets.length;
       setCurrentSubtopic(`DSA_problemset_${(m + 1).toString()}`);
