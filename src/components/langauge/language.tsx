@@ -310,8 +310,9 @@ useEffect(() => {
       Java: 'https://upload.wikimedia.org/wikipedia/en/3/30/Java_programming_language_logo.svg',
       JavaScript: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png',
       'C++': 'https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg',
-      'DSA': 'https://cdn-icons-png.flaticon.com/512/2106/2106603.png' // Added DSA logo
+      DSA: 'https://cdn-icons-png.flaticon.com/512/2103/2103652.png'
     };
+    
 
     return (
       <img
@@ -333,7 +334,7 @@ useEffect(() => {
           <div className={styles.card}>
             {myCourses.length === 0 ? (
               <div className={styles.welcomeMessage}>
-                <h1>Welcome to Plato, pick a language to get started!</h1>
+                <h1>Welcome to Plato, pick a Course to get started!</h1>
                 <div className={styles.gridContainer}>
                   {['Python', 'Java', 'JavaScript', 'C++','DSA'].map(language => (
                     <div key={language} className={styles.languageCard}
@@ -367,7 +368,7 @@ useEffect(() => {
                 </div>
                 {otherLanguages.length > 0 && (
                   <div className={styles.footer}>
-                    <p className={styles.footerText}>Want to start learning another language?</p>
+                    <p className={styles.footerText}>Want to learn something else?</p>
                     <div className={styles.gridContainer}>
                       {otherLanguages.map(language => (
                         <div key={language} className={styles.languageCard}

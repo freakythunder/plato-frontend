@@ -162,7 +162,7 @@ const Practice: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>Practice Problem Sets</h2>
-        <button className={styles.createButton} onClick={() => setShowModal(true)}>+ Create</button>
+        <button className={styles.createButton} onClick={() => setShowModal(true)}>+ Create New Problemset</button>
       </div>
       <div className={styles.problemSetsContainerWrapper}>
         <div className={styles.problemSetsContainer} style={{ height: '400px' }}>
