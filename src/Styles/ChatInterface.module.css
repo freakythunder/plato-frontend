@@ -322,8 +322,6 @@
   height: 40px;
   flex: 0 0 auto;
   padding: 8px; 
-<<<<<<< HEAD
-=======
 }
 
 .disabledButton {
@@ -418,5 +416,4 @@
   font-weight: 500;
   border-left: 3px solid #d63384;
   overflow-x: auto;
->>>>>>> feature-practice-arena-frontend
 }

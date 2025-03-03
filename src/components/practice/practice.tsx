@@ -19,7 +19,7 @@ const Practice: React.FC = () => {
       // Set special global prompt so that ChatInterface avoids sending a message.
       setGlobalPrompt("don't send handlsend");
       // Update allProblemSets state by adding the prompt.
-      setAllProblemSets([...allProblemSets, currentPrompt]);
+      
       setCurrentSubtopic(`DSA_problemset_${serialNumber.toString()}`);
     } else {
       console.log('Generating problem set for:', currentPrompt);

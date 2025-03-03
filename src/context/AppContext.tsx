@@ -9,8 +9,6 @@ interface ProgressContextType {
   setCurrentSubtopic: (currentSubtopic: string) => void;
   currentTopic: Topic | null;
   setCurrentTopic: (currentTopic: Topic) => void;
-<<<<<<< HEAD
-=======
   practiceMode: boolean;
   setPracticeMode: (mode: boolean) => void;
   prompt: string;
@@ -19,7 +17,6 @@ interface ProgressContextType {
   setAllProblemSets: (sets: any[]) => void;
   allTopics: AllTopic[];
   setAllTopics: (topics: AllTopic[]) => void;
->>>>>>> feature-practice-arena-frontend
 }
 interface Topic {
   id: number;
@@ -27,8 +24,6 @@ interface Topic {
   subtopics: Subtopic[];
   completed: boolean;
 }
-<<<<<<< HEAD
-=======
 interface AllTopic {
   id: number;
   language: string;
@@ -36,7 +31,6 @@ interface AllTopic {
 }
  
 
->>>>>>> feature-practice-arena-frontend
 interface Subtopic {
   id: number;
   name: string;
@@ -46,15 +40,6 @@ interface Subtopic {
 const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
 
 export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-<<<<<<< HEAD
-  const [hasRunCode, setHasRunCode] = useState(false);
-  const [hasClickedNextButton, setHasClickedNextButton] = useState(false);
-  const [currentSubtopic, setCurrentSubtopic] = useState('');
-  const [currentTopic, setCurrentTopic] = useState<Topic | null>(null);
-
-  return (
-    <ProgressContext.Provider value={{ hasRunCode, hasClickedNextButton, setHasRunCode, setHasClickedNextButton, currentSubtopic, setCurrentSubtopic,currentTopic, setCurrentTopic }}>
-=======
   // Initialize currentSubtopic from localStorage if available
   const [currentSubtopic, setCurrentSubtopic] = useState(() => localStorage.getItem('currentSubtopic') || '');
   const [hasRunCode, setHasRunCode] = useState(false);
@@ -97,7 +82,6 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       allTopics,
       setAllTopics,
     }}>
->>>>>>> feature-practice-arena-frontend
       {children}
     </ProgressContext.Provider>
   );
