@@ -161,8 +161,8 @@ const handleSendMessage = async (message: string) => {
   try {
     let backendMessage = message;
 
-    if (message === "My code is not working." && code.trim()) {
-      backendMessage = `${message}. Here is my code: ${code}`;
+    if (code.trim()) {
+      backendMessage = `${message}. (only refer to code if needed otherwise ignore code) Here is my code: ${code}`;
     }
 
     const response = await fetch(`${process.env.REACT_APP_API_URL}/chat/send`, {
@@ -414,7 +414,8 @@ const formatMessage = (message: string): string => {
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <div className={styles.buttonSection}>
+      {topicsExist && (
+        <div className={styles.buttonSection}>
         {/* First Row of Buttons */}
         <div className={styles.buttonRow}>
           <button className={`${styles.customButton} ${styles.button1}`} onClick={() => handleButtonClick("My code is not working.")}>
@@ -428,6 +429,7 @@ const formatMessage = (message: string): string => {
           </button>
         </div>
       </div>
+      )}
       <div className={styles.chatComponent}><Chat onSend={handleSend} /></div>
       
       {/* Only render navigation buttons if topics exist */}

@@ -105,7 +105,7 @@
 .problemSetsContainerWrapper {
   margin-bottom: 20px;
   width: 80%;
-  min-width: 600px; /* Ensure minimum width even when empty */
+  min-width: 800px; /* Ensure minimum width even when empty */
 }
 
 .problemSetsContainer {

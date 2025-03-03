@@ -388,7 +388,7 @@ useEffect(() => {
             <LanguageLogo language="DSA" />
             <h3 className={styles.cardTitle}>DSA Practice Arena</h3>
             <p className={styles.dsaCardDescription}>Practice data structures and algorithms</p>
-            <div className={styles.comingSoonBadge}>Coming Soon</div>
+            <div className={styles.comingSoonBadge}>Start Practicing</div>
           </div>
         </div>
       </div>
