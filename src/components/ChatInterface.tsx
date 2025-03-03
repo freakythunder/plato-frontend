@@ -85,6 +85,7 @@ const messageFetchTokenRef = useRef<number>(0);
         setTimeout(() => {
           handleSendMessage(globalPrompt);
         }, 200);
+        
       }
       clearGlobalPrompt('');
       console.log("currentSubtopic", currentSubtopic);
@@ -93,7 +94,8 @@ const messageFetchTokenRef = useRef<number>(0);
   
   const loadPastConversations = async () => {
     try {
-
+      // Clear error state when attempting to load conversations
+      setError(null);
 
       // Clear messages state before fetching new messages
       setMessages([]);
