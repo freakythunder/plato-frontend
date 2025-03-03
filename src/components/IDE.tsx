@@ -19,7 +19,8 @@ const languageMap: { [key: string]: string } = {
   cpp: 'cpp',
   'c++': 'cpp',
   java: 'java',
-  javascript: 'javascript'
+  javascript: 'javascript',
+  dsa : 'cpp'
 };
 
 const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun, onWebSocketCreate }, ref) => {
@@ -44,7 +45,10 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun, onWebSocketCreate }, 
   }));
 
   const getInitialLanguage = () => {
-    const stored = localStorage.getItem('language') || 'javascript';
+    const stored = localStorage.getItem('language');
+    if(stored === 'DSA') {
+      return 'cpp'; 
+    }
     return languageMap[stored.toLowerCase()] || 'javascript';
   };
   const [editorLanguage, setEditorLanguage] = useState(getInitialLanguage());

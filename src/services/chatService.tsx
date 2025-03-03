@@ -1,6 +1,6 @@
 // src/services/chatService.ts
 import api from './api';
-import { useProgress } from '../context/AppContext';
+
 // src/services/chatService.tsx
 
 // src/services/chatService.tsx

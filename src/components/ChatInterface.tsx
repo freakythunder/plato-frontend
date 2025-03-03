@@ -10,6 +10,8 @@ import useLocalStorage from '../services/localHook';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked'; // Ensure these are installed via npm or yarn
 import posthog from 'posthog-js';
+import { useLocation } from 'react-router-dom';
+
 interface ChatInterfaceProps {
   code: string; // Function to get the current code from IDE
 
@@ -28,15 +30,26 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Add check for refresh flag; reload only once using localStorage flag.
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.refresh && !localStorage.getItem("alreadyRefreshed")) {
+      localStorage.setItem("alreadyRefreshed", "true");
+      window.location.reload();
+    } else {
+      localStorage.removeItem("alreadyRefreshed");
+    }
+  }, [location.state]);
 
   const username = localStorage.getItem('username');
   const { setShouldClearCode } = useAuth();
   
-  const {currentSubtopic, setCurrentSubtopic} = useProgress();
+  const {currentSubtopic, setCurrentSubtopic, practiceMode, prompt: globalPrompt, setPrompt: clearGlobalPrompt, setPracticeMode} = useProgress();
 
   const { setHasClickedNextButton } = useProgress();
 
   const {setCurrentTopic} = useProgress();
+  
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -52,18 +65,37 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
 
  
 
-
+  // Add a ref to track message fetch sessions
+const messageFetchTokenRef = useRef<number>(0);
   useEffect(() => {
 
     if (currentSubtopic) {
+      // When subtopic changes, cancel any ongoing message fetch by updating token and clear messages.
+      messageFetchTokenRef.current++;
       setMessages([]);
       loadPastConversations();
     }
   }, [currentSubtopic]);
-
+  
+  useEffect(() => {
+    if (practiceMode && globalPrompt) {
+      setMessages([]);
+      loadPastConversations();
+      if (globalPrompt !== "don't send handlsend") {
+        setTimeout(() => {
+          handleSendMessage(globalPrompt);
+        }, 1000);
+        
+      }
+      clearGlobalPrompt('');
+      console.log("currentSubtopic", currentSubtopic);
+    }
+  }, [practiceMode, globalPrompt, location.pathname]);
+  
   const loadPastConversations = async () => {
     try {
-
+      // Clear error state when attempting to load conversations
+      setError(null);
 
       // Clear messages state before fetching new messages
       setMessages([]);
@@ -97,15 +129,13 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
 
       } else {
         console.error('Invalid response format:', response);
-        setError(response.message || 'Failed to load conversations');
+        
       }
     } catch (err) {
       console.error('Error loading conversations:', err);
-      setError('Failed to load past conversations');
+      
     }
   };
-
-
 
 
 
@@ -125,11 +155,14 @@ const handleSendMessage = async (message: string) => {
 
   setMessages(prev => [...prev, newUserMessage]);
 
+  // Increment token for this fetch session and capture it.
+  const token = ++messageFetchTokenRef.current;
+
   try {
     let backendMessage = message;
 
-    if (message === "My code is not working." && code.trim()) {
-      backendMessage = `${message}. Here is my code: ${code}`;
+    if (code.trim()) {
+      backendMessage = `${message}. (only refer to code if needed otherwise ignore code) Here is my code: ${code}`;
     }
 
     const response = await fetch(`${process.env.REACT_APP_API_URL}/chat/send`, {
@@ -149,6 +182,9 @@ const handleSendMessage = async (message: string) => {
     let fullResponse = "";
 
     while (true) {
+      // If subtopic has changed, stop updating messages.
+      if (token !== messageFetchTokenRef.current) break;
+
       const { done, value } = await reader.read();
       if (done) break;
 
@@ -156,31 +192,37 @@ const handleSendMessage = async (message: string) => {
       buffer += chunk;
       fullResponse += chunk;
 
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg._id === newUserMessage._id
-            ? { ...msg, aiResponse: fullResponse }
-            : msg
-        )
-      );
+      if (token === messageFetchTokenRef.current) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === newUserMessage._id
+              ? { ...msg, aiResponse: fullResponse }
+              : msg
+          )
+        );
 
-      // Scroll to bottom after each chunk update
-      scrollToBottom();
+        // Scroll to bottom after each chunk update
+        scrollToBottom();
+      }
     }
 
     // Save full response on completion
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg._id === newUserMessage._id
-          ? { ...msg, aiResponse: fullResponse.trim() }
-          : msg
-      )
-    );
+    if (token === messageFetchTokenRef.current) {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === newUserMessage._id
+            ? { ...msg, aiResponse: fullResponse.trim() }
+            : msg
+        )
+      );
+    }
   } catch (err) {
     console.error("Error sending message:", err);
     setError("Failed to send message");
   } finally {
-    setIsLoading(false);
+    if (token === messageFetchTokenRef.current) {
+      setIsLoading(false);
+    }
   }
 };
 
@@ -206,8 +248,24 @@ const formatMessage = (message: string): string => {
     
   };
 
+  // Add this state to check if topics exist
+  const [topicsExist, setTopicsExist] = useState(false);
+  
+  // Improve the check for topics in localStorage
+  useEffect(() => {
+    const topics = localStorage.getItem('topics');
+    try {
+      const parsedTopics = topics ? JSON.parse(topics) : null;
+      setTopicsExist(!!parsedTopics && Array.isArray(parsedTopics) && parsedTopics.length > 0);
+      console.log("Topics exist:", !!parsedTopics && Array.isArray(parsedTopics) && parsedTopics.length > 0);
+    } catch (error) {
+      console.error("Error parsing topics from localStorage:", error);
+      setTopicsExist(false);
+    }
+  }, []);
 
   const handlePrevTopic = async () => {
+    if (!topicsExist) return; // Don't proceed if topics don't exist
     console.log("prev topic clicked");
     
     const topics = JSON.parse(localStorage.getItem('topics'));
@@ -247,6 +305,7 @@ const formatMessage = (message: string): string => {
   };
 
   const handleNextTopic = async () => {
+    if (!topicsExist) return; // Don't proceed if topics don't exist
     // console.log("currentsubtopic", currentSubtopic);
     // const topics = JSON.parse(localStorage.getItem('topics'));
     // const currentTopic = topics.find((t) => t.subtopics.find((st) => st.name === currentSubtopic));
@@ -262,7 +321,7 @@ const formatMessage = (message: string): string => {
     //     // Current subtopic is the last one in the topic, move to next topic
     //     const nextTopicIndex = topics.indexOf(currentTopic) + 1;
     //     if (nextTopicIndex < topics.length) {
-    //       const nextTopic = topics[nextTopicIndex];
+    //       const nextTopic = nextTopicIndex;
     //       const nextSubtopic = nextTopic.subtopics[0]; // First subtopic of the next topic    
     //       setMessages([]);
     //       setCurrentSubtopic(nextSubtopic.name);
@@ -322,7 +381,12 @@ const formatMessage = (message: string): string => {
     });
   };
 
-
+  // Add effect to disable practice mode if user leaves the main page
+  useEffect(() => {
+    if (location.pathname !== '/main' && practiceMode) {
+      setPracticeMode(false);
+    }
+  }, [location.pathname, practiceMode, setPracticeMode]);
 
   return (
     <div className={styles.chatContainer}>
@@ -350,7 +414,8 @@ const formatMessage = (message: string): string => {
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <div className={styles.buttonSection}>
+      {topicsExist && (
+        <div className={styles.buttonSection}>
         {/* First Row of Buttons */}
         <div className={styles.buttonRow}>
           <button className={`${styles.customButton} ${styles.button1}`} onClick={() => handleButtonClick("My code is not working.")}>
@@ -364,19 +429,32 @@ const formatMessage = (message: string): string => {
           </button>
         </div>
       </div>
+      )}
       <div className={styles.chatComponent}><Chat onSend={handleSend} /></div>
-      <div className={styles.navbuttonrow}>
-        <button className={`${styles.navButton} ${styles.button1}`} onClick={handlePrevTopic}>
-          Prev
-        </button>
-        <button className={`${styles.navButton} ${styles.button2}`} onClick={handleNextTopic}>
-          Next
-        </button>
-      </div>
+      
+      {/* Only render navigation buttons if topics exist */}
+      {topicsExist && (
+        <div className={styles.navbuttonrow}>
+          <button 
+            className={`${styles.navButton} ${styles.button1}`} 
+            onClick={handlePrevTopic}
+          >
+            Prev
+          </button>
+          <button 
+            className={`${styles.navButton} ${styles.button2}`} 
+            onClick={handleNextTopic}
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {error && <div className={styles.errorMessage}>{error}</div>}
     </div>
   );
+
+
 
 });
 

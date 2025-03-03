@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styles from './language.module.css';
 import { useNavigate } from 'react-router-dom';
-import posthog from 'posthog-js'
+import posthog from 'posthog-js';
+import { useProgress } from '../../context/AppContext';
 posthog.init('phc_SkoWOGNlQvwgXkAqlKWmYT6l0JStbH2Dpeh5dtY1b2N', { api_host: 'https://us.i.posthog.com' })
 
 const calculateCompletion = (topics) => {
@@ -28,7 +29,7 @@ const Language: React.FC = () => {
   const [myCourses, setMyCourses] = useState([]);
   const [otherLanguages, setOtherLanguages] = useState([]);
   const [completions, setCompletions] = useState({});
- 
+  const {setAllProblemSets} = useProgress();
 
 // Track latest allTopics state using ref
 const allTopicsRef = React.useRef(allTopics);
@@ -93,7 +94,7 @@ useEffect(() => {
       if (topics.length > 0) {
         sendTopicsToBackend(topics);
       }
-    }, 5000);
+    }, 20000);
   }
 
   // Cleanup: clear the interval on component unmount.
@@ -149,8 +150,9 @@ useEffect(() => {
         }
       }
       else {
-        console.warn('[Initial Load] Stored language not found in allTopics');
-        const newLanguageEntry = {
+        if(storedLanguage !== 'DSA_Practice'){
+          console.warn('[Initial Load] Stored language not found in allTopics');
+          const newLanguageEntry = {
           language: storedLanguage,
           topics: currentTopics,
         };
@@ -158,6 +160,8 @@ useEffect(() => {
         // Add to parsedTopics and update storage
         parsedTopics = [...parsedTopics, newLanguageEntry];
         localStorage.setItem('allTopics', JSON.stringify(parsedTopics));
+        }
+        
         
       }
     }
@@ -170,11 +174,11 @@ useEffect(() => {
       const courses = parsedTopics.map(topic => topic.language);
       setMyCourses(courses);
 
-      const others = ['Python', 'Java', 'JavaScript', 'C++']
+      const others = ['Python', 'Java', 'JavaScript', 'C++','DSA']
         .filter(lang => !courses.includes(lang));
       setOtherLanguages(others);
     } else {
-      setOtherLanguages(['Python', 'Java', 'JavaScript', 'C++']);
+      setOtherLanguages(['Python', 'Java', 'JavaScript', 'C++','DSA']);
     }
   }, []);
 
@@ -208,12 +212,12 @@ useEffect(() => {
     const storedLanguage = localStorage.getItem('language');
     
     if (storedLanguage === language) {
-      navigate('/main');
+      navigate('/main' , {state :{refresh : true}});
       return;
     }
 
-    // Update allTopics with current progress before switching
-    if (storedLanguage) {
+    // Update allTopics with current progress before switching 
+    if (storedLanguage && storedLanguage !== 'DSA_Practice') {
       const currentTopics = JSON.parse(localStorage.getItem('topics')) || [];
       const updatedAllTopics = allTopics.map(topic =>
         topic.language === storedLanguage ? { ...topic, topics: currentTopics } : topic
@@ -222,7 +226,7 @@ useEffect(() => {
       localStorage.setItem('allTopics', JSON.stringify(updatedAllTopics));
       updateCompletions(updatedAllTopics);
     }
-
+    
     localStorage.setItem('language', language);
 
     try {
@@ -262,9 +266,40 @@ useEffect(() => {
           }
         }
       }
-      navigate('/main');
+      navigate('/main' , {state :{refresh : true}});
     } catch (error) {
       console.error('Error:', error);
+    }
+  };
+
+  // New handler for DSA practice click
+  const handleDSAPracticeClick = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/dsa/allproblemsets`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const problemset = await response.json();
+      const allproblemset = problemset.data;
+      setAllProblemSets(allproblemset);
+      const storedLanguage = localStorage.getItem('language');
+      const currentTopics = JSON.parse(localStorage.getItem('topics')) || [];
+      const updatedAllTopics = allTopics.map(topic =>
+        topic.language === storedLanguage ? { ...topic, topics: currentTopics } : topic
+      );
+      setAllTopics(updatedAllTopics);
+      localStorage.setItem('allTopics', JSON.stringify(updatedAllTopics));
+      updateCompletions(updatedAllTopics);
+      
+      localStorage.removeItem('topics');
+      localStorage.setItem('language', 'DSA_Practice');
+      navigate('/practice');
+    } catch (error) {
+      console.error('Error initiating DSA practice:', error);
     }
   };
 
@@ -274,8 +309,10 @@ useEffect(() => {
       Python: 'https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg',
       Java: 'https://upload.wikimedia.org/wikipedia/en/3/30/Java_programming_language_logo.svg',
       JavaScript: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png',
-      'C++': 'https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg'
+      'C++': 'https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg',
+      DSA: 'https://cdn-icons-png.flaticon.com/512/2103/2103652.png'
     };
+    
 
     return (
       <img
@@ -292,57 +329,69 @@ useEffect(() => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
-        {myCourses.length === 0 ? (
-          <div className={styles.welcomeMessage}>
-            <h1>Welcome to Plato, pick a language to get started!</h1>
-            <div className={styles.gridContainer}>
-              {['Python', 'Java', 'JavaScript', 'C++'].map(language => (
-                <div key={language} className={styles.languageCard}
-                  onClick={() => handleLanguageClick(language)}>
-                  <LanguageLogo language={language} />
-                  <h3 className={styles.cardTitle}>{language}</h3>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className={styles.header}>
-              <h1 className={styles.title}>My Courses</h1>
-            </div>
-            <div className={styles.gridContainer}>
-              {myCourses.map(course => (
-                <div key={course} className={styles.languageCard}
-                  onClick={() => handleLanguageClick(course)}>
-                  <LanguageLogo language={course} />
-                  <h3 className={styles.cardTitle}>Learning {course}</h3>
-                  <div className={styles.progressBar}>
-                    <div className={styles.progressFill}
-                      style={{ width: `${completions[course] ? completions[course].percentage : 0}%` }} />
-                  </div>
-                  <span className={styles.completionText}>
-                  {completions[course] ? `${completions[course].completed}/${completions[course].total} subtopics completed` : '0% Completed'}
-                  </span>
-                </div>
-              ))}
-            </div>
-            {otherLanguages.length > 0 && (
-              <div className={styles.footer}>
-                <p className={styles.footerText}>Want to start learning another language?</p>
+      <div className={styles.innerWrapper}>
+        <div className={styles.coursesContainer}>
+          <div className={styles.card}>
+            {myCourses.length === 0 ? (
+              <div className={styles.welcomeMessage}>
+                <h1>Welcome to Plato, pick a Course to get started!</h1>
                 <div className={styles.gridContainer}>
-                  {otherLanguages.map(language => (
+                  {['Python', 'Java', 'JavaScript', 'C++','DSA'].map(language => (
                     <div key={language} className={styles.languageCard}
                       onClick={() => handleLanguageClick(language)}>
                       <LanguageLogo language={language} />
-                      <h3 className={styles.cardTitle}>{language}</h3>  
+                      <h3 className={styles.cardTitle}>{language}</h3>
                     </div>
                   ))}
                 </div>
               </div>
+            ) : (
+              <>
+                <div className={styles.header}>
+                  <h1 className={styles.title}>My Courses</h1>
+                </div>
+                <div className={styles.gridContainer}>
+                  {myCourses.map(course => (
+                    <div key={course} className={styles.languageCard}
+                      onClick={() => handleLanguageClick(course)}>
+                      <LanguageLogo language={course} />
+                      <h3 className={styles.cardTitle}>Learning {course}</h3>
+                      <div className={styles.progressBar}>
+                        <div className={styles.progressFill}
+                          style={{ width: `${completions[course] ? completions[course].percentage : 0}%` }} />
+                      </div>
+                      <span className={styles.completionText}>
+                        {completions[course] ? `${completions[course].completed}/${completions[course].total} subtopics completed` : '0% Completed'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                {otherLanguages.length > 0 && (
+                  <div className={styles.footer}>
+                    <p className={styles.footerText}>Want to learn something else?</p>
+                    <div className={styles.gridContainer}>
+                      {otherLanguages.map(language => (
+                        <div key={language} className={styles.languageCard}
+                          onClick={() => handleLanguageClick(language)}>
+                          <LanguageLogo language={language} />
+                          <h3 className={styles.cardTitle}>{language}</h3>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
+          </div>
+        </div>
+        <div className={styles.dsaContainer} onClick={handleDSAPracticeClick}>
+          <div className={styles.dsaCard} >
+            <LanguageLogo language="DSA" />
+            <h3 className={styles.cardTitle}>DSA Practice Arena</h3>
+            <p className={styles.dsaCardDescription}>Practice data structures and algorithms</p>
+            <div className={styles.comingSoonBadge}>Start Practicing</div>
+          </div>
+        </div>
       </div>
     </div>
   );

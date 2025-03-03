@@ -69,7 +69,7 @@ const Navbar: React.FC = () => {
 
     posthog.reset(true);
   };
-
+  const topicsPresent = localStorage.getItem('topics') === null;
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -81,7 +81,7 @@ const Navbar: React.FC = () => {
       <div className={styles.title}>plato</div>
 
       <div className={styles.syllabus}>
-        {location.pathname !== '/home' && <Syllabus />}
+      {(!topicsPresent && (location.pathname !== '/home' && location.pathname!=='/practice' ))&& <Syllabus />}
       </div>
 
       <div className={styles.navLinks} >

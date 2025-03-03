@@ -14,6 +14,9 @@ interface ExecutionResult {
 export const executeCode = (code: string): ExecutionResult => {
   const sessionId = uuidv4();
   let language = localStorage.getItem('language') || 'python';
+  if(language === 'DSA' || language === 'DSA_Practice') {
+    language = 'c++';  // DSA is not a valid language for the code executor
+  }
   const lowercaselanguage = language.toLowerCase();
   const ws = new WebSocket(`wss://code-executor-app.ambitioussmoke-08c18a0b.eastus2.azurecontainerapps.io/`);
   language = lowercaselanguage;
