@@ -90,6 +90,7 @@ const messageFetchTokenRef = useRef<number>(0);
       console.log("currentSubtopic", currentSubtopic);
     }
   }, [practiceMode, globalPrompt, location.pathname]);
+  
   const loadPastConversations = async () => {
     try {
 

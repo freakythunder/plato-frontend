@@ -16,24 +16,25 @@ const Practice: React.FC = () => {
     const currentPrompt = promptOverride ?? prompt;
     if (serialNumber !== undefined) {
       console.log('Generating problem set for table row:', currentPrompt, serialNumber);
+      setCurrentSubtopic(`DSA_problemset_${serialNumber.toString()}`);
       // Set special global prompt so that ChatInterface avoids sending a message.
       setGlobalPrompt("don't send handlsend");
       // Update allProblemSets state by adding the prompt.
       setPracticeMode(true);
-      setCurrentSubtopic(`DSA_problemset_${serialNumber.toString()}`);
+      
     } else {
       console.log('Generating problem set for:', currentPrompt);
+      const m = allProblemSets.length;
+      setCurrentSubtopic(`DSA_problemset_${(m + 1).toString()}`);
       setGlobalPrompt(currentPrompt);
       setPracticeMode(true);
       setAllProblemSets([...allProblemSets, currentPrompt]);
-      const m = allProblemSets.length;
-      setCurrentSubtopic(`DSA_problemset_${(m + 1).toString()}`);
+      
     }
     localStorage.setItem('language', 'DSA_Practice');
     setTimeout(() => {
-      
       navigate('/main');
-    }, 500);
+    }, 1000);
   };
 
   useEffect(() => {
