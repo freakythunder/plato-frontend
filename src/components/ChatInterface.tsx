@@ -430,6 +430,22 @@ const formatMessage = (message: string): string => {
         </div>
       </div>
       )}
+      {!topicsExist && (
+        <div className={styles.buttonSection}>
+        {/* First Row of Buttons */}
+        <div className={styles.buttonRow}>
+          <button className={`${styles.customButton} ${styles.button1}`} onClick={() => handleButtonClick("Help me with my code")}>
+            Help me with my code
+          </button>
+          <button className={`${styles.customButton} ${styles.button2}`} onClick={() => handleButtonClick("Move to next challenge")}>
+            Move to next challenge
+          </button>
+          <button className={`${styles.customButton} ${styles.button3}`} onClick={() => handleButtonClick("Need a hint 💡")}>
+            Need a hint 💡
+          </button>
+        </div>
+      </div>
+      )}
       <div className={styles.chatComponent}><Chat onSend={handleSend} /></div>
       
       {/* Only render navigation buttons if topics exist */}
