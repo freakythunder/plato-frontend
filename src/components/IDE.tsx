@@ -46,7 +46,7 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun, onWebSocketCreate }, 
 
   const getInitialLanguage = () => {
     const stored = localStorage.getItem('language');
-    if(stored === 'DSA') {
+    if(stored === 'DSA_Practice') {
       return 'cpp'; 
     }
     return languageMap[stored.toLowerCase()] || 'javascript';
