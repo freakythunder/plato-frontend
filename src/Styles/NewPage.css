@@ -58,12 +58,25 @@
   display: end;
 }
 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f7fafc;
+}
+
 .container {
   background-color: #f7fafc;
   padding: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 100vh; /* Ensures full viewport height */
+  position: relative;
 }
 
 .title {
@@ -79,6 +92,9 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-height: 70vh; /* Restricts scrolling area */
+  overflow-y: auto; /* Enables scrolling */
+  padding-bottom: 60px; /* Space for button */
 }
 
 .topic {
@@ -89,15 +105,15 @@
 }
 
 .topic-title {
+  font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
   cursor: pointer;
-  color: #2563eb;
 }
 
 .subtopics-container {
   margin-left: 1rem;
-  padding-top: 0.5rem;
+  padding-top: 1rem;
 }
 
 .subtopic {
@@ -109,7 +125,7 @@
 }
 
 .subtopic-title {
-  font-weight: 500;
+  font-weight: 550;
   cursor: pointer;
   color: #374151;
 }
@@ -128,17 +144,20 @@
   background: #e2e8f0;
 }
 
+/* Sticky Button */
 .start-learning {
   background-color: #3b82f6;
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
-  margin-top: 2rem;
   cursor: pointer;
   font-size: 1rem;
   font-weight: 500;
   transition: background 0.3s ease;
-  align-self: flex-end;
+  position: sticky;
+  bottom: 10px; /* Makes it visible when scrolling */
+  align-self: center;
+  z-index: 1000;
 }
 
 .start-learning:hover {
