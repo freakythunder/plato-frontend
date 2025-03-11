@@ -80,9 +80,10 @@ const Navbar: React.FC = () => {
     <nav className={styles.navbar}>
       <div className={styles.title}>plato</div>
 
-      <div className={styles.syllabus}>
+      
+      {/*<div className={styles.syllabus}>
       {(!topicsPresent && (location.pathname !== '/home' && location.pathname!=='/practice' ))&& <Syllabus />}
-      </div>
+      </div>*/}
 
       <div className={styles.navLinks} >
 

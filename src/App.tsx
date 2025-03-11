@@ -10,6 +10,7 @@ import { ProgressProvider } from './context/AppContext';
 import 'firebaseui/dist/firebaseui.css';
 import Language from './components/langauge/language';
 import Practice from './components/practice/practice';
+import NewPage from './pages/NewPage';
 const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem('token');
   return isAuthenticated ? children : <Navigate to="/" />;
@@ -22,7 +23,7 @@ const App: React.FC = () => {
     <AuthProvider>
       <div className="appContainer">
         {/* Render Navbar only if the current path is not the home page */}
-        {location.pathname !== '/' && <Navbar />}
+        {location.pathname !== '/'  && <Navbar />}
         
         <Routes>
           <Route path="/" element={<HomePage />}  />
@@ -52,6 +53,16 @@ const App: React.FC = () => {
               <PrivateRoute>
                 
                   <Practice/>
+                
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/newpage"
+            element={
+              <PrivateRoute>
+                
+                  <NewPage/>
                 
               </PrivateRoute>
             }
