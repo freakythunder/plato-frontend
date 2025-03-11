@@ -23,7 +23,7 @@ const App: React.FC = () => {
     <AuthProvider>
       <div className="appContainer">
         {/* Render Navbar only if the current path is not the home page */}
-        {location.pathname !== '/' && <Navbar />}
+        {location.pathname !== '/'  && <Navbar />}
         
         <Routes>
           <Route path="/" element={<HomePage />}  />
