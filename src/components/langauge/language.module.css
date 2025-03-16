@@ -1,14 +1,46 @@
-/* language.module.css */
 .container {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  flex-direction: column;
+  height: 100%; /* Use height instead of min-height */
   background-color: #f8f9fa;
   padding: 40px 2rem 2rem; /* added top padding to avoid overlap with navbar */
   font-family: 'Arial', sans-serif;
   color: #333;
   overflow-y: auto;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 20px;
+}
+
+.headerTitle {
+  font-size: 2rem;
+  color: #333;
+  margin: 0;
+}
+
+.newCourseButton {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'sometype mono', sans-serif;
+  font-size: 1rem;
+}
+
+.newCourseButton:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .innerWrapper {
@@ -17,6 +49,8 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  flex: 1; /* Take remaining space */
+  overflow-y: auto; /* Only allow scrolling here if needed */
 }
 
 .coursesContainer {
@@ -64,8 +98,16 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow on hover */
   background-color: #f7f7f7; /* Change the background color on hover */
 }
-/* Rest of your existing CSS remains the same */
-/* ... (keep other styles unchanged) */
+
+.cardTitle {
+  font-size: 1.2rem;
+  margin: 10px 0;
+}
+
+.completionText {
+  font-size: 0.8rem;
+  color: #666;
+}
 
 @media (max-width: 768px) {
   .container {
@@ -84,6 +126,12 @@
   .languageCard {
     min-height: auto;
     padding: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 }
 

@@ -11,6 +11,7 @@ import DOMPurify from 'dompurify';
 import { marked } from 'marked'; // Ensure these are installed via npm or yarn
 import posthog from 'posthog-js';
 import { useLocation } from 'react-router-dom';
+import { useSyllabusProgress } from '../services/useSyllabusProgress';
 
 interface ChatInterfaceProps {
   code: string; // Function to get the current code from IDE
@@ -28,15 +29,22 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ code }
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingPastConversations, setLoadingPastConversations] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Add check for refresh flag; reload only once using localStorage flag.
+  // Move useSyllabusProgress call to the top level of the component
+  const { handlePrevTopic: syllabusHandlePrevTopic, handleNextTopic: syllabusHandleNextTopic } = useSyllabusProgress();
+
+  // Fix refresh logic - Critical part that was missing
   const location = useLocation();
   useEffect(() => {
+    // Only refresh once and track it with localStorage
     if (location.state?.refresh && !localStorage.getItem("alreadyRefreshed")) {
       localStorage.setItem("alreadyRefreshed", "true");
+      console.log("Refreshing ChatInterface due to location state");
       window.location.reload();
-    } else {
+    } else if (!location.state?.refresh) {
+      // Clear the flag when not coming from a refresh navigation
       localStorage.removeItem("alreadyRefreshed");
     }
   }, [location.state]);
@@ -96,10 +104,28 @@ const messageFetchTokenRef = useRef<number>(0);
     try {
       // Clear error state when attempting to load conversations
       setError(null);
+      setLoadingPastConversations(true);
 
       // Clear messages state before fetching new messages
       setMessages([]);
 
+      // Determine if this is a theory or challenge based on the ID format
+      const isTheory = currentSubtopic?.includes('theory') || 
+                      (localStorage.getItem('viewMode') === 'theory');
+      
+      // Add a temporary loading message
+      const tempLoadingMessage: Message = {
+        _id: 'loading_message_' + Date.now(),  // Make ID unique with timestamp
+        user_id: '',
+        userMessage: '',
+        aiResponse: isTheory ? 
+          "LLM is curating a personalized theory for you..." : 
+          "Crafting a coding challenge for you...",
+        timestamp: new Date().toISOString(),
+      };
+      
+      setMessages([tempLoadingMessage]);
+      
       const response = await getPastConversations(currentSubtopic);
 
       if (response.success) {
@@ -125,15 +151,41 @@ const messageFetchTokenRef = useRef<number>(0);
         );
 
         // Update the messages state with the new chats
-        setMessages(sortedChats);
+        if (sortedChats.length > 0) {
+          setMessages(sortedChats);
+        } else {
+          // If we got no messages from the API but we're in a valid subtopic,
+          // keep the loading message for a better UX
+          setMessages([{
+            ...tempLoadingMessage,
+            aiResponse: isTheory ?
+              "Theories for this topic are still being crafted. Check back soon!" :
+              "Challenges for this topic are still being prepared. Check back soon!"
+          }]);
+        }
 
       } else {
         console.error('Invalid response format:', response);
-        
+        // Keep the loading message but change it to an error state
+        setMessages([{
+          _id: 'error_message',
+          user_id: '',
+          userMessage: '',
+          aiResponse: "There was an issue loading the content. Please try again later.",
+          timestamp: new Date().toISOString(),
+        }]);
       }
     } catch (err) {
       console.error('Error loading conversations:', err);
-      
+      setMessages([{
+        _id: 'error_message',
+        user_id: '',
+        userMessage: '',
+        aiResponse: "Error loading content. Please check your connection and try again.",
+        timestamp: new Date().toISOString(),
+      }]);
+    } finally {
+      setLoadingPastConversations(false);
     }
   };
 
@@ -226,6 +278,73 @@ const handleSendMessage = async (message: string) => {
   }
 };
 
+// Add silent message sending functionality that doesn't display the user message
+const handleSilentSendMessage = async (message: string) => {
+  if (!message.trim() || isLoading) return;
+
+  setIsLoading(true);
+  setError(null);
+
+  // No user message is added to UI here, unlike handleSendMessage
+  
+  // Increment token for this fetch session and capture it.
+  const token = ++messageFetchTokenRef.current;
+
+  try {
+    let backendMessage = message;
+
+    if (code.trim()) {
+      backendMessage = `${message}. (only refer to code if needed otherwise ignore code) Here is my code: ${code}`;
+    }
+
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/chat/send`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ message: backendMessage }),
+    });
+
+    if (!response.body) throw new Error("No response body");
+    
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = "";
+
+    while (true) {
+      if (token !== messageFetchTokenRef.current) break;
+
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      fullResponse += chunk;
+
+      if (token === messageFetchTokenRef.current) {
+        // Replace the loading message with the AI response
+        setMessages((prev) => {
+          if (prev.length > 0 && prev[0]._id.includes('loading_message')) {
+            return [{
+              ...prev[0],
+              aiResponse: fullResponse
+            }];
+          }
+          return prev;
+        });
+        scrollToBottom();
+      }
+    }
+  } catch (err) {
+    console.error("Error sending silent message:", err);
+    setError("Failed to load content");
+  } finally {
+    if (token === messageFetchTokenRef.current) {
+      setIsLoading(false);
+    }
+  }
+};
+
 // Format the message with markdown support and sanitization
 const formatMessage = (message: string): string => {
   // Ensure `marked.parse` returns a string
@@ -264,74 +383,24 @@ const formatMessage = (message: string): string => {
     }
   }, []);
 
+  // After successful navigation, trigger a rerender of the Navbar by updating localStorage
+  const triggerBreadcrumbUpdate = useCallback(() => {
+    // Update a timestamp to force component re-renders that depend on localStorage
+    localStorage.setItem('breadcrumbLastUpdated', Date.now().toString());
+  }, []);
+
+  // Update handlePrevTopic and handleNextTopic to trigger breadcrumb updates
   const handlePrevTopic = async () => {
     if (!topicsExist) return; // Don't proceed if topics don't exist
-    console.log("prev topic clicked");
-    
-    const topics = JSON.parse(localStorage.getItem('topics'));
-    const currentTopic = topics.find((t) => t.subtopics.find((st) => st.name === currentSubtopic));
-    const currentSubtopicIndex = currentTopic.subtopics.indexOf(currentTopic.subtopics.find((st) => st.name === currentSubtopic));
-    if (currentSubtopicIndex > 0) {
-      const previousSubtopic = currentTopic.subtopics[currentSubtopicIndex - 1];
-      posthog.capture('module_changed' , {
-        button : 'Previous',
-        from : currentSubtopic,
-        to : previousSubtopic.name
-        
-      });
-      // if (previousSubtopic.completed) {
-        setShouldClearCode(true);
-        setMessages([]);
-        setCurrentSubtopic(previousSubtopic.name);
-      //}
-    }
-    else {
-      const currentTopicindex = topics.indexOf(currentTopic);
-      const prevtopicIndex = currentTopicindex - 1;
-      const previousSubtopic = topics[prevtopicIndex].subtopics[topics[prevtopicIndex].subtopics.length - 1];
-      //if (previousSubtopic.completed) {
-        posthog.capture('module_changed' , {
-          button : 'Previous',
-          from : currentSubtopic,
-          to : previousSubtopic.name
-          
-        });
-        setCurrentTopic(topics[prevtopicIndex]);
-        setShouldClearCode(true);
-        setMessages([]);
-        setCurrentSubtopic(previousSubtopic.name);
-      //}
-    }
+    syllabusHandlePrevTopic(); // Use the method from the hook
+    triggerBreadcrumbUpdate(); // Update breadcrumbs
   };
 
   const handleNextTopic = async () => {
     if (!topicsExist) return; // Don't proceed if topics don't exist
-    // console.log("currentsubtopic", currentSubtopic);
-    // const topics = JSON.parse(localStorage.getItem('topics'));
-    // const currentTopic = topics.find((t) => t.subtopics.find((st) => st.name === currentSubtopic));
-    // const currentSubtopicIndex = currentTopic.subtopics.indexOf(currentTopic.subtopics.find((st) => st.name === currentSubtopic));
-    //   // Find the next subtopic
-    //   if (currentSubtopicIndex < currentTopic.subtopics.length - 1) {
-    //     // Next subtopic is within the same topic
-    //     const nextSubtopic = currentTopic.subtopics[currentSubtopicIndex + 1];
-    //     setMessages([]);
-    //     setCurrentSubtopic(nextSubtopic.name);
-    //     setShouldClearCode(true);
-    //   } else {
-    //     // Current subtopic is the last one in the topic, move to next topic
-    //     const nextTopicIndex = topics.indexOf(currentTopic) + 1;
-    //     if (nextTopicIndex < topics.length) {
-    //       const nextTopic = nextTopicIndex;
-    //       const nextSubtopic = nextTopic.subtopics[0]; // First subtopic of the next topic    
-    //       setMessages([]);
-    //       setCurrentSubtopic(nextSubtopic.name);
-    //       setShouldClearCode(true);
-    //     }
-    //   }
-    setMessages([]);
-      setHasClickedNextButton(true);
+    syllabusHandleNextTopic(); // Use the hook method instead of manually setting flags
+    triggerBreadcrumbUpdate(); // Update breadcrumbs
   };
-  
 
 
   const handleButtonClick = async (buttonText: string) => {
@@ -387,6 +456,35 @@ const formatMessage = (message: string): string => {
       setPracticeMode(false);
     }
   }, [location.pathname, practiceMode, setPracticeMode]);
+
+  // Add effect to auto-send a message if needed
+  useEffect(() => {
+    // Check if we should auto-send a message (flag set by NewPage.tsx)
+    const shouldAutoSendMessage = localStorage.getItem("shouldAutoSendMessage") === "true";
+    
+    if (shouldAutoSendMessage && currentSubtopic) {
+      console.log("Auto-sending initial message for new subtopic (silent mode)");
+      
+      // Get subtopic details for a more personalized message
+      const isTheory = localStorage.getItem('viewMode') === 'theory';
+      let initialMessage = "";
+      
+      if (isTheory) {
+        initialMessage = "Please explain the theory for this topic.";
+      } else {
+        initialMessage = "Please provide me with a coding challenge for this topic.";
+      }
+      
+      // Clear the flag to prevent sending on subsequent renders
+      localStorage.setItem("shouldAutoSendMessage", "false");
+      
+      // Use a slight delay to ensure everything is properly loaded
+      setTimeout(() => {
+        // Use the silent send function instead
+        handleSilentSendMessage(initialMessage);
+      }, 1000);
+    }
+  }, [currentSubtopic]);
 
   return (
     <div className={styles.chatContainer}>

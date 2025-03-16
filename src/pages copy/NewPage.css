@@ -1,0 +1,547 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'sometype-mono', monospace;
+  background-color: var(--background-color, #f5f7fa);
+  color: var(--text-color, #333);
+}
+
+.course-container {
+  max-width: 100%;
+  height: calc(100vh - 60px);
+  margin: 0 auto;
+  padding: 1.5rem;
+  overflow: hidden;
+ 
+}
+
+/* Course Header Styles */
+.course-header {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.course-title {
+  font-family: 'sometype-mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #0b0909;
+}
+
+/* Two column layout */
+.course-content-wrapper {
+  display: flex;
+  gap: 1.5rem;
+  height: calc(100% - 4rem);
+}
+
+/* Left sidebar */
+.course-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.course-info-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  height: auto;
+}
+
+.course-info-card h2 {
+  font-family: 'sometype-mono', monospace;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #0b0909;
+}
+
+.course-info-card h3 {
+  font-family: 'sometype-mono', monospace;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #0b0909;
+}
+
+.course-progress-container {
+  margin-bottom: 1.5rem;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: #0c0d0f;
+}
+
+.progress-percentage {
+  font-weight: 600;
+  color: #4CAF50; /* Green theme accent */
+}
+
+.progress-bar {
+  height: 6px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #4CAF50; /* Green theme accent */
+  transition: width 0.3s ease;
+}
+
+.resume-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.resume-section p {
+  font-size: 0.85rem;
+  color: #0c0d0f;
+  margin-bottom: 1rem;
+}
+
+.resume-button {
+  background-color: #4CAF50; /* Green theme button */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+  display: block;
+  text-align: center;
+  font-family: 'sometype-mono', monospace;
+}
+
+.resume-button:hover {
+  background-color: #45a049; /* Darker green on hover */
+}
+
+/* Right modules section */
+.modules-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modules-title {
+  font-family: 'sometype-mono', monospace;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #0b0909;
+}
+
+.modules-scrollable {
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 0.5rem;
+}
+
+/* Unified module container */
+.unified-module-container {
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Module styling */
+.course-module {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.course-module:last-child {
+  border-bottom: none;
+}
+
+.module-header {
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.module-header:hover {
+  background-color: #f8f9fa;
+}
+
+.module-header.expanded {
+  border-bottom: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+}
+
+.module-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.module-number {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0c0d0f;
+}
+
+.module-title {
+  font-family: 'sometype-mono', monospace;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #0b0909;
+}
+
+.module-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.module-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.module-progress span {
+  font-size: 0.85rem;
+  color: #0c0d0f;
+  min-width: 40px;
+}
+
+.module-progress-bar {
+  width: 80px;
+  height: 5px;
+  background-color: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.module-progress-fill {
+  height: 100%;
+  background-color: #4CAF50; /* Green theme accent */
+  transition: width 0.3s ease;
+}
+
+.module-expand-icon {
+  color: #0c0d0f;
+  font-size: 0.7rem;
+}
+
+.module-content {
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* Subtopic Styles */
+.subtopic-container {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.subtopic-container:last-child {
+  border-bottom: none;
+}
+
+.subtopic-header {
+  padding: 1rem 1.5rem 1rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.subtopic-header:hover {
+  background-color: #f0f0f0;
+}
+
+.subtopic-header.expanded {
+  background-color: #f0f0f0;
+}
+
+.subtopic-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subtopic-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.subtopic-title {
+  font-family: 'sometype-mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #0b0909;
+}
+
+.subtopic-icon {
+  color: #4CAF50; /* Green theme accent */
+  font-size: 0.9rem;
+}
+
+.subtopic-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.estimated-time {
+  font-size: 0.8rem;
+  color: #0c0d0f;
+}
+
+.subtopic-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subtopic-progress span {
+  font-size: 0.8rem;
+  color: #0c0d0f;
+}
+
+.subtopic-progress-bar {
+  width: 60px;
+  height: 4px;
+  background-color: #e9ecef;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.subtopic-progress-fill {
+  height: 100%;
+  background-color: #4CAF50; /* Green theme accent */
+  transition: width 0.3s ease;
+}
+
+.subtopic-expand-icon {
+  color: #0c0d0f;
+  font-size: 0.7rem;
+}
+
+/* Learning material list styling (includes theory and challenges) */
+.learning-material-list {
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  background-color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Theory item styling - Updated for single theory item per subtopic */
+.theory-item {
+  padding: 0.8rem 1.2rem;
+  border-radius: 4px;
+  background-color: #e8f5e9; /* Light green background to distinguish from challenges */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 10px; /* Add spacing between theory and challenges */
+  border-left: 3px solid #4CAF50; /* Green accent border */
+}
+
+.theory-item:hover {
+  background-color: #c8e6c9; /* Darker green on hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.theory-left {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.theory-status-icon {
+  font-size: 0.9rem;
+  color: #4CAF50; /* Green theme accent */
+  width: 18px;
+  text-align: center;
+}
+
+.theory-name {
+  font-size: 0.85rem;
+  font-family: 'sometype-mono', monospace;
+  font-weight: 500; /* Make theory title a bit bolder */
+  color: #0b0909;
+}
+
+.theory-right {
+  display: flex;
+  align-items: center;
+}
+
+.theory-time {
+  font-size: 0.8rem;
+  color: #0c0d0f;
+}
+
+/* Challenge item styling */
+.challenge-item {
+  padding: 0.8rem 1.2rem;
+  border-radius: 4px;
+  background-color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.challenge-item:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.challenge-item.completed {
+  background-color: rgba(76, 175, 80, 0.08); /* Light green for completed */
+}
+
+.challenge-left {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.challenge-status-icon {
+  font-size: 0.9rem;
+  color: #4CAF50; /* Green theme accent */
+  width: 18px;
+  text-align: center;
+}
+
+.completed .challenge-status-icon {
+  color: #4CAF50; /* Green theme accent for completed */
+}
+
+.challenge-type-icon {
+  font-size: 0.9rem;
+  color: #0c0d0f;
+  width: 18px;
+  text-align: center;
+}
+
+.challenge-name {
+  font-size: 0.85rem;
+  font-family: 'sometype-mono', monospace;
+  color: #0b0909;
+}
+
+.challenge-right {
+  display: flex;
+  align-items: center;
+}
+
+.challenge-time {
+  font-size: 0.8rem;
+  color: #0c0d0f;
+}
+
+/* Scrollbar styling */
+.modules-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modules-scrollable::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.modules-scrollable::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.modules-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 980px) {
+  .course-content-wrapper {
+    flex-direction: column;
+  }
+  
+  .course-sidebar {
+    width: 100%;
+  }
+  
+  .modules-scrollable {
+    max-height: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  .module-header, 
+  .subtopic-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .module-right,
+  .subtopic-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .challenge-item,
+  .theory-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .challenge-right,
+  .theory-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* Add these styles to the end of your CSS file */
+
+.highlighted-module {
+  border-left: 4px solid #4a90e2;
+  box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+}
+
+.highlighted-header {
+  background-color: rgba(74, 144, 226, 0.1);
+}
+
+.highlighted-subtopic {
+  border-left: 3px solid #4a90e2;
+}
+
+.highlighted-item {
+  background-color: rgba(74, 144, 226, 0.15);
+  border-left: 3px solid #4a90e2;
+  box-shadow: 0 0 8px rgba(74, 144, 226, 0.2);
+}

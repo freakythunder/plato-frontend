@@ -25,6 +25,12 @@ const HomePage: React.FC = () => {
 
   const auth = getAuth(); // Initialize Firebase Auth instance
 
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      navigate('/home');
+    }
+  }, [navigate]);
+
   const handleGoogleLogin = async () => {
     setErrorMessage("");
     setLoading(true);
@@ -75,7 +81,16 @@ const HomePage: React.FC = () => {
         const alltopics = response.data.data.topics;
         localStorage.setItem("allTopics", JSON.stringify(alltopics));
         login(user.displayName, sessionToken, message);
-        navigate("/home");
+        
+        // Check if this is a new user
+        const isNewUser = message.trim().toLowerCase() === 'user registered';
+        
+        // Redirect based on user status
+        if (isNewUser) {
+          navigate("/course_generation");
+        } else {
+          navigate("/home");
+        }
       } else {
         throw new Error("Invalid response from server");
       }

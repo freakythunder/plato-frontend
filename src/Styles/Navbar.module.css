@@ -1,7 +1,8 @@
 /* src/Styles/Navbar.module.css */
 .navbar {
-    background-color:rgb(198 219 188);
-    padding: 15px 30px;
+    background-color: rgb(198 219 188);
+    padding: 0 30px; /* Removed top/bottom padding */
+    height: 60px; /* Set fixed height */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -14,6 +15,56 @@
     font-size: 24px;
     font-weight: bold;
     margin: 0;
+    cursor: pointer;
+    transition: color 0.3s, transform 0.2s;
+}
+
+.title:hover {
+    color: #008407;
+    transform: scale(1.05);
+    text-decoration: underline;
+}
+
+.leftSection {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    font-family: 'sometype mono';
+    padding: 5px 15px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
+.breadcrumbItem {
+    font-size: 14px;
+    color: #000000;
+    cursor: pointer;
+    transition: color 0.3s;
+    white-space: nowrap;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: bold;
+}
+
+.breadcrumbItem:hover {
+    color: #008407;
+    text-decoration: underline;
+}
+
+.currentBreadcrumb {
+    font-weight: bold;
+    color: #008407;
+}
+
+.breadcrumbSeparator {
+    margin: 0 8px;
+    color: #34495e;
 }
 
 .navLinks {
@@ -106,6 +157,6 @@
     display: flex;
     overflow: hidden; 
   }
-  
+
 
 

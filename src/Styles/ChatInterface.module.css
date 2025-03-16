@@ -3,8 +3,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: #f0f4f8;
-  overflow: hidden;
+  background-color: #ffffff;
+  overflow: hidden; /* Hide container scrollbar */
   width: 100%;
   position: relative;
   border-radius: 12px;
@@ -14,8 +14,8 @@
 
 .messagesContainer {
   flex: 1;
-  overflow-y: auto;
-  padding: 16px;
+  overflow-y: auto; /* Only this container should scroll */
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -229,6 +229,8 @@
   padding: 4px; /* Reduced padding */
   background-color: #ffffff;
   border-top: 1px solid #e0e0e0;
+  position: relative; /* Ensure position context */
+  width: 100%;
 }
 
 .buttonRow {
@@ -322,6 +324,9 @@
   height: 40px;
   flex: 0 0 auto;
   padding: 8px; 
+  position: relative; /* Ensure position context */
+  width: 100%;
+  z-index: 5; /* Ensure buttons appear above other elements */
 }
 
 .disabledButton {
@@ -416,4 +421,11 @@
   font-weight: 500;
   border-left: 3px solid #d63384;
   overflow-x: auto;
+}
+
+/* Add this new class to ensure chat component has proper positioning */
+.chatComponent {
+  position: relative;
+  width: 100%;
+  z-index: 5;
 }
