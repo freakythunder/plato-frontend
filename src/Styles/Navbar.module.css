@@ -19,10 +19,9 @@
     transition: color 0.3s, transform 0.2s;
 }
 
+/* Removed color change, transform scale and text decoration */
 .title:hover {
-    color: #008407;
-    transform: scale(1.05);
-    text-decoration: underline;
+    /* Only cursor pointer is needed, which is already in .title class */
 }
 
 .leftSection {

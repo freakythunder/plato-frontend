@@ -92,6 +92,34 @@ const Language: React.FC = () => {
 
     return { completed: completedWeight, total: totalWeight };
   };
+  
+  // New function to calculate progress using NewPage.tsx logic
+  const calculateDetailedProgress = (topics) => {
+    if (!topics || !Array.isArray(topics)) return 0;
+    
+    let totalItems = 0;
+    let completedItems = 0;
+    
+    topics.forEach(topic => {
+      if (topic.subtopics && Array.isArray(topic.subtopics)) {
+        topic.subtopics.forEach(subtopic => {
+          // Count challenges
+          if (subtopic.challenges && Array.isArray(subtopic.challenges)) {
+            totalItems += subtopic.challenges.length;
+            completedItems += subtopic.challenges.filter(c => c.completed).length;
+          }
+          
+          // Count theory items
+          if (subtopic.theory && Array.isArray(subtopic.theory)) {
+            totalItems += subtopic.theory.length;
+            completedItems += subtopic.theory.filter(t => t.completed).length;
+          }
+        });
+      }
+    });
+    
+    return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+  };
 
   // Update completions when allTopics changes
   const updateCompletions = (topics) => {
@@ -100,15 +128,24 @@ const Language: React.FC = () => {
     const newCompletions = topics.reduce((acc, topic) => {
       if (!topic || !topic.topics) return acc;
       
+      // Use original calculation for subtopic count display
       const completion = calculateCompletion(topic.topics);
-      const percentageCompletion = calculateCompletionPercentage(completion.completed, completion.total);
-      acc[topic.language] = { completed: completion.completed, total: completion.total, percentage: percentageCompletion };
+      
+      // Use new detailed calculation for progress bar percentage
+      const percentageCompletion = calculateDetailedProgress(topic.topics);
+      
+      acc[topic.language] = { 
+        completed: completion.completed, 
+        total: completion.total, 
+        percentage: percentageCompletion 
+      };
       return acc;
     }, {});
     
     setCompletions(newCompletions);
   };
 
+  // Original function - keep it for consistent display of subtopic counts
   const calculateCompletionPercentage = (completed, total) => {
     return total === 0 ? 0 : Math.round((completed / total) * 100);
   };
@@ -146,19 +183,6 @@ const Language: React.FC = () => {
               topics: currentTopics 
             };
             
-            localStorage.setItem('allTopics', JSON.stringify(parsedTopics));
-          }
-        }
-        else if (currentTopics && currentTopics.length > 0) {
-          // If language not found in allTopics but we have topics, add it
-          if(storedLanguage !== 'DSA_Practice') {
-            const newLanguageEntry = {
-              language: storedLanguage,
-              topics: currentTopics,
-            };
-        
-            // Add to parsedTopics and update storage
-            parsedTopics = [...parsedTopics, newLanguageEntry];
             localStorage.setItem('allTopics', JSON.stringify(parsedTopics));
           }
         }
@@ -303,8 +327,16 @@ const Language: React.FC = () => {
                     <LanguageLogo language={course} />
                     <h3 className={styles.cardTitle}>Learning {course}</h3>
                     <div className={styles.progressBar}>
-                      <div className={styles.progressFill}
-                        style={{ width: `${completions[course] ? completions[course].percentage : 0}%` }} />
+                      <div 
+                        className={styles.progressFill} 
+                        style={{ 
+                          width: `${completions[course] ? completions[course].percentage : 0}%`,
+                          backgroundColor: '#4CAF50',
+                          height: '100%',
+                          borderRadius: '4px',
+                          transition: 'width 0.3s ease'
+                        }} 
+                      />
                     </div>
                     <span className={styles.completionText}>
                       {completions[course] ? `${completions[course].completed}/${completions[course].total} subtopics completed` : '0% Completed'}

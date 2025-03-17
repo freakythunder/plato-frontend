@@ -163,7 +163,16 @@ const CourseGeneration: React.FC = () => {
 
   const handleGoalSelection = (selectedGoal: string) => {
     setGoal(selectedGoal);
-    setCurrentStep(3);
+    
+    if (selectedGoal === 'dsa') {
+      // For DSA, automatically set language to C++ and skip to step 4
+      setLanguage('C++');
+      setCurrentStep(4);
+    } else {
+      // For language learning, go to step 3 to select a language
+      setCurrentStep(3);
+    }
+    
     posthog.capture('course_generation_goal_selected', {
       goal: selectedGoal
     });
@@ -286,20 +295,38 @@ const CourseGeneration: React.FC = () => {
   const handleNextStep = () => {
     // Only proceed if allowed
     if (canProceedToNext()) {
-      setCurrentStep(prev => Math.min(prev + 1, totalSteps));
-      posthog.capture('course_generation_next_step', {
-        from_step: currentStep,
-        to_step: currentStep + 1
-      });
+      if (currentStep === 2 && goal === 'dsa') {
+        // Skip step 3 (language selection) for DSA path
+        setCurrentStep(4);
+        posthog.capture('course_generation_next_step', {
+          from_step: currentStep,
+          to_step: 4
+        });
+      } else {
+        setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+        posthog.capture('course_generation_next_step', {
+          from_step: currentStep,
+          to_step: currentStep + 1
+        });
+      }
     }
   };
 
   const handlePrevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-    posthog.capture('course_generation_prev_step', {
-      from_step: currentStep,
-      to_step: currentStep - 1
-    });
+    // Special case: if at step 4 with goal='dsa', go back to step 2 since we skipped step 3
+    if (currentStep === 4 && goal === 'dsa') {
+      setCurrentStep(2);
+      posthog.capture('course_generation_prev_step', {
+        from_step: currentStep,
+        to_step: 2
+      });
+    } else {
+      setCurrentStep(prev => Math.max(prev - 1, 1));
+      posthog.capture('course_generation_prev_step', {
+        from_step: currentStep,
+        to_step: currentStep - 1
+      });
+    }
   };
 
   // Render the expertise step with sticky header and scrollable content

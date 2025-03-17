@@ -76,7 +76,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isVisible }) => {
           title="Learning Dashboard"
         >
           <FontAwesomeIcon icon={faGraduationCap} className={styles.icon} />
-          <span className={styles.label}>My courses</span>
+          <span className={styles.label}>Home</span>
         </div>
         <div 
           className={`${styles.sidebarItem} ${isActive('/practice') ? styles.active : ''}`}
