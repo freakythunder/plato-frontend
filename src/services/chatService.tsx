@@ -59,7 +59,7 @@ export const getPastConversations = async (currentSubtopic: string): Promise<Pas
     isPastConversationsRequestInProgress = true;
     
     const subtopicId = currentSubtopic;
-    const language = localStorage.getItem('language') ;
+    const language = localStorage.getItem('language');
     const backendlanguage = language.toLowerCase();
     
     // Extract indexes from subtopicId

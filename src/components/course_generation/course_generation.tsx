@@ -287,7 +287,7 @@ const CourseGeneration: React.FC = () => {
       const data = dat.data;
       
       // The courseLanguage we're looking for
-      const courseLanguage = goal.toLocaleLowerCase() === 'dsa' ? 'DSA' : language;
+      const courseLanguage = goal.toLowerCase() === 'dsa' ? 'DSA' : language;
       
       // Find the topics for the selected language from the array
       const matchingLanguageData = Array.isArray(data) && 

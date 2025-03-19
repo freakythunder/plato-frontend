@@ -46,11 +46,15 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun, onWebSocketCreate }, 
   }));
 
   const getInitialLanguage = () => {
+    
     const stored = localStorage.getItem('language');
-    if(stored === 'DSA_Practice') {
-      return 'cpp'; 
+    if(stored !== null){
+      if(stored === 'DSA_Practice') {
+        return 'cpp'; 
+      }
+      return languageMap[stored.toLowerCase()] || 'javascript';
     }
-    return languageMap[stored.toLowerCase()] || 'javascript';
+    
   };
   const [editorLanguage, setEditorLanguage] = useState(getInitialLanguage());
   const monacoRef = useRef<any>(null);
