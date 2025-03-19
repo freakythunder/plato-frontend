@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './course_generation.module.css';
 import { useAuth } from '../../context/AuthContext';
@@ -15,6 +15,11 @@ const CourseGeneration: React.FC = () => {
   const [expertise, setExpertise] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const [loadingMessage, setLoadingMessage] = useState(''); // For rotating messages
+  // New state variables for progress bar
+  const [progress, setProgress] = useState(0);
+  const [stopAtPercentage, setStopAtPercentage] = useState(0);
+  const [backendResponseReceived, setBackendResponseReceived] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Total number of steps in the process
   const totalSteps = 4;
@@ -154,6 +159,53 @@ const CourseGeneration: React.FC = () => {
     return [];
   };
 
+  // Progress bar timer effect
+  useEffect(() => {
+    if (!isLoading) {
+      setProgress(0);
+      setBackendResponseReceived(false);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
+    
+    // Generate random stopping point between 94-99%
+    const randomStop = Math.floor(Math.random() * 6) + 94;
+    setStopAtPercentage(randomStop);
+    
+    // Calculate interval to reach the stopping point in 4 minutes
+    // This allows the remaining progress to complete after backend response
+    const intervalTime = (4 * 60 * 1000) / randomStop;
+    
+    timerRef.current = setInterval(() => {
+      setProgress((prevProgress) => {
+        if (prevProgress >= stopAtPercentage && !backendResponseReceived) {
+          // Stop at the random percentage until backend responds
+          return stopAtPercentage;
+        } else if (prevProgress >= 100) {
+          // Clear interval when reaching 100%
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+          return 100;
+        } else {
+          // Normal progress increase
+          return prevProgress + 1;
+        }
+      });
+    }, intervalTime);
+    
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isLoading, backendResponseReceived, stopAtPercentage]);
+
   const handleReadyClick = () => {
     setCurrentStep(2);
     posthog.capture('course_generation_started', {
@@ -201,8 +253,18 @@ const CourseGeneration: React.FC = () => {
         expertise_levels: expertise
       });
       
+      // Sort the expertise topics by knowledge level
+      // (expert/knows very well -> familiar -> beginner)
+      const expertiseOrder = { "expert": 1, "familiar": 2, "beginner": 3 };
+      const sortedExpertiseTopics = Object.entries(expertise).sort((a, b) => {
+        return expertiseOrder[a[1]] - expertiseOrder[b[1]];
+      });
+      
+      // Create an ordered expertise object
+      const orderedExpertise = Object.fromEntries(sortedExpertiseTopics);
+      
       const token = localStorage.getItem("token");
-      let referencelang = goal === 'dsa' ? 'C++' : language ;
+      let referencelang = goal === 'dsa' ? 'C++' : language;
       const response = await fetch(`${process.env.REACT_APP_API_URL}/language/generate-course`, {
         method: 'POST',
         headers: {
@@ -212,17 +274,20 @@ const CourseGeneration: React.FC = () => {
         body: JSON.stringify({ 
           goal, 
           language: goal === 'dsa' ? 'C++' : language, 
-          expertise 
+          expertise: orderedExpertise // Use the ordered expertise object
         }),
       });
       
       if (!response.ok) throw new Error('Failed to generate course');
       
+      // Mark that backend response has been received to complete the progress bar
+      setBackendResponseReceived(true);
+      
       const dat = await response.json();
-      const data  = dat.data;
+      const data = dat.data;
       
       // The courseLanguage we're looking for
-      const courseLanguage = goal === 'dsa' ? 'DSA' : language;
+      const courseLanguage = goal.toLocaleLowerCase() === 'dsa' ? 'DSA' : language;
       
       // Find the topics for the selected language from the array
       const matchingLanguageData = Array.isArray(data) && 
@@ -260,8 +325,30 @@ const CourseGeneration: React.FC = () => {
         // Set flag to indicate a new course was just generated
         localStorage.setItem('newCourseGenerated', 'true');
         
-        // Navigate to course page instead of main page
-        navigate('/course');
+        // Quick progress to 100% before navigating
+        const completeProgress = () => {
+          // Start a fast timer to quickly get to 100%
+          const fastInterval = setInterval(() => {
+            setProgress((prevProgress) => {
+              if (prevProgress >= 100) {
+                clearInterval(fastInterval);
+                return 100;
+              }
+              return prevProgress + 2; // Increment quickly by 2% each time
+            });
+          }, 25); // Update every 25ms for quick progress
+          
+          // Give time for progress bar to reach 100% before navigating
+          setTimeout(() => {
+            clearInterval(fastInterval);
+            // Navigate to course page instead of main page
+            navigate('/course');
+          }, 500); // 500ms delay to ensure progress bar completes
+        };
+        
+        // If progress is already >= stopAtPercentage, complete the progress
+        completeProgress();
+        
       } else {
         throw new Error('No matching topics found for the selected language');
       }
@@ -517,7 +604,16 @@ const CourseGeneration: React.FC = () => {
               <span className={styles.codeLine}>{'}'}</span>
             </div>
           </div>
-          <div className={styles.loadingSpinner}></div>
+          
+          {/* Progress bar with a single percentage indicator */}
+          <div className={styles.progressBarContainer}>
+            <div 
+              className={styles.progressBar} 
+              style={{ width: `${progress}%` }}
+            ></div>
+            <span className={styles.progressBarText}>{progress}% Complete</span>
+          </div>
+          
           <h2 className={styles.loadingTitle}>Creating your personalized course</h2>
           <p className={styles.loadingMessage}>{loadingMessage}</p>
         </div>

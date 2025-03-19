@@ -186,7 +186,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogoClick }) => {
     });
   };
 
-  const feedbackLink = "https://calendly.com/adityaramteke-1357/15min?month=2025-03";
+  const feedbackLink = "https://forms.gle/1PAjZiSpvLKdMYpb7";
 
   return (
     <nav className={styles.navbar} style={{ zIndex: 100 }}>
@@ -215,12 +215,12 @@ const Navbar: React.FC<NavbarProps> = ({ onLogoClick }) => {
 
       <div className={styles.navLinks}>
         <div className={styles.feedbackSection}>
-          <span className={styles.feedbackText}>Have Feedback?</span>
+          <span className={styles.feedbackText}>Got ideas to make Plato better?</span>
           <button
             className={styles.feedbackButton}
             onClick={() => window.open(feedbackLink, '_blank')}
           >
-            Talk to Founders
+          Help Us
           </button>
         </div>
         {isAuthenticated ? (

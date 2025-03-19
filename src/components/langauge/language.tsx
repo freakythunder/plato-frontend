@@ -339,7 +339,7 @@ const Language: React.FC = () => {
                       />
                     </div>
                     <span className={styles.completionText}>
-                      {completions[course] ? `${completions[course].completed}/${completions[course].total} subtopics completed` : '0% Completed'}
+                      {completions[course] ? <span>You've completed <span className={styles.progressPercentage}>{completions[course].percentage}%</span></span> : '0% Completed'}
                     </span>
                   </div>
                 ))}

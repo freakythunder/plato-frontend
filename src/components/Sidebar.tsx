@@ -75,7 +75,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isVisible }) => {
           onClick={handleHomeClick}
           title="Learning Dashboard"
         >
-          <FontAwesomeIcon icon={faGraduationCap} className={styles.icon} />
+          <FontAwesomeIcon icon={faHome} className={styles.icon} />
           <span className={styles.label}>Home</span>
         </div>
         <div 

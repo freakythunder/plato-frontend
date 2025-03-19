@@ -5,6 +5,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import styles from '../Styles/ChatInterface.module.css';
 import { ComponentPropsWithoutRef } from 'react';
+import { preprocessMarkdown } from '../utils/markdownHelper';
 
 interface FormattedAIResponseProps {
   response: {
@@ -26,8 +27,9 @@ const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) =
     const aiResponse = response.aiResponse;
     const content = typeof aiResponse === 'string' ? aiResponse : aiResponse?.aiResponse || '';
     
-    // Set the extracted content directly without validation
-    setMarkdownContent(content);
+    // Preprocess the markdown content to ensure proper rendering
+    const processedContent = preprocessMarkdown(content);
+    setMarkdownContent(processedContent);
   }, [response]);
 
   const formattedTimestamp = new Date(response.timestamp).toLocaleString();
@@ -42,8 +44,10 @@ const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) =
           // Improved code block rendering with better inline styling
           code({ inline, className, children, ...props }: ComponentPropsWithoutRef<'code'> & { inline?: boolean }) {
             const match = /language-(\w+)/.exec(className || '');
-            // Only use dark background for explicit language-tagged code blocks
-            if (!inline && match && match[1] !== 'plaintext') {
+            const content = String(children).replace(/\n$/, '');
+            
+            // Handle code blocks with language specification
+            if (!inline && match) {
               return (
                 <SyntaxHighlighter
                   style={vscDarkPlus as any}
@@ -52,17 +56,17 @@ const FormattedAIResponse: React.FC<FormattedAIResponseProps> = ({ response }) =
                   PreTag="div"
                   {...props}
                 >
-                  {String(children).replace(/\n$/, '')}
+                  {content}
                 </SyntaxHighlighter>
               );
-            } else {
-              // For inline code or code without language specification
-              return (
-                <code className={styles.inlineCode} {...props}>
-                  {children}
-                </code>
-              );
-            }
+            } 
+            
+            // For inline code
+            return (
+              <code className={styles.inlineCode} {...props}>
+                {children}
+              </code>
+            );
           },
           
           // Headers with consistent styling

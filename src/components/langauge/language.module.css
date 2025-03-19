@@ -105,8 +105,14 @@
 }
 
 .completionText {
-  font-size: 0.8rem;
-  color: #666;
+  font-size: 0.85rem;
+  color: #0c0d0f;
+  margin-top: 5px;
+}
+
+.progressPercentage {
+  font-weight: 600;
+  color: #4CAF50;
 }
 
 @media (max-width: 768px) {
