@@ -8,7 +8,7 @@ interface HorizontalSplitterProps {
   onCodeChange: (code: string) => void; 
 }
 
-const HorizontalSplitter: React.FC<HorizontalSplitterProps> = ({ onCodeChange}) => {
+const HorizontalSplitter: React.FC<HorizontalSplitterProps> = ({ onCodeChange }) => {
   const [outputHeightPercent, setOutputHeightPercent] = useState(30); // Output height in %
   const [ideHeightPercent, setIdeHeightPercent] = useState(70); // IDE height in %
   const [output, setOutput] = useState('');
@@ -19,7 +19,6 @@ const HorizontalSplitter: React.FC<HorizontalSplitterProps> = ({ onCodeChange}) 
   const [activeWebSocket, setActiveWebSocket] = useState<WebSocket | null>(null);
   const { shouldClearCode, setShouldClearCode } = useAuth();
 
-
   useEffect(() => {
     if (shouldClearCode) {
       setOutput(''); // Clear the output when shouldClearCode is true
@@ -27,72 +26,78 @@ const HorizontalSplitter: React.FC<HorizontalSplitterProps> = ({ onCodeChange}) 
       console.log("Output cleared in HorizontalSplitter"); // Optional: Log for debugging
     }
   }, [shouldClearCode, setShouldClearCode]);
-  const handleGetCode = () => {
+
+  // Improved handler for getting code
+  const handleGetCode = useCallback(() => {
     const currentCode = ideRef.current?.getCode();
     if (currentCode) {
-      onCodeChange(currentCode); // Pass the current code to the parent
+      onCodeChange(currentCode);
     }
-  };
+  }, [onCodeChange]);
+
   // Function to calculate the container height in pixels
-  const calculateContainerHeight = () => containerRef.current?.clientHeight || window.innerHeight;
+  const calculateContainerHeight = useCallback(() => 
+    containerRef.current?.clientHeight || window.innerHeight, []);
 
   // Update heights based on output height percentage
   useEffect(() => {
-    const containerHeight = calculateContainerHeight();
-    setIdeHeightPercent(100 - outputHeightPercent); // Ensure IDE takes 100% minus the output space
+    setIdeHeightPercent(100 - outputHeightPercent);
   }, [outputHeightPercent]);
 
-  // Callback to handle code output and open the output pane
+  // Enhanced run code handler
   const handleRunCode = useCallback((output: string) => {
-    
     setOutput(output);
     setOutputHeightPercent(30);
-    handleGetCode (); // Set initial output height to 30%
-  }, []);
+    handleGetCode();
+  }, [handleGetCode]);
 
   // Close output and reset IDE to full height
-  const handleCloseOutput = () => {
+  const handleCloseOutput = useCallback(() => {
     setOutputHeightPercent(0);
-    setIdeHeightPercent(100); // IDE takes up full height
-  };
+    setIdeHeightPercent(100);
+  }, []);
 
-  // Handle dynamic resizing of output and IDE
-  const handleMouseMove = (event: MouseEvent) => {
-    if (!isResizing.current) return;
+  // Improved mouse move handler with boundary checking
+  const handleMouseMove = useCallback((event: MouseEvent) => {
+    if (!isResizing.current || !containerRef.current) return;
 
     const containerHeight = calculateContainerHeight();
     const newOutputHeightPercent = ((containerHeight - event.clientY) / containerHeight) * 100;
 
-    if (newOutputHeightPercent >= 5 && newOutputHeightPercent <= 60) { // Set bounds in percentage (5%-60%)
+    if (newOutputHeightPercent >= 5 && newOutputHeightPercent <= 60) {
       setOutputHeightPercent(newOutputHeightPercent);
       setIdeHeightPercent(100 - newOutputHeightPercent);
     }
-  };
+  }, [calculateContainerHeight]);
 
-  const handleMouseDown = () => {
+  const handleMouseDown = useCallback(() => {
     isResizing.current = true;
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [handleMouseMove]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     isResizing.current = false;
-    window.removeEventListener('mousemove', handleMouseMove);
-    window.removeEventListener('mouseup', handleMouseUp);
-  };
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  }, [handleMouseMove]);
 
+  // Setup and cleanup event listeners
   useEffect(() => {
-    if (splitterRef.current) {
-      splitterRef.current.addEventListener('mousedown', handleMouseDown);
+    const splitterElement = splitterRef.current;
+    
+    if (splitterElement) {
+      splitterElement.addEventListener('mousedown', handleMouseDown);
     }
+    
     return () => {
-      splitterRef.current?.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      if (splitterElement) {
+        splitterElement.removeEventListener('mousedown', handleMouseDown);
+      }
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, []);
-
-
+  }, [handleMouseDown, handleMouseMove, handleMouseUp]);
 
   return (
     <div ref={containerRef} className={styles.splitterContainer} style={{ position: 'relative', height: '100%' }}>

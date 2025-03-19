@@ -39,6 +39,7 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun, onWebSocketCreate }, 
   const runButtonRef = useRef<HTMLButtonElement | null>(null);
   const { setHasRunCode } = useProgress();
   const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
+  const wasEditorFocused = useRef<boolean>(false);
 
   useImperativeHandle(ref, () => ({
     getCode: () => code,
@@ -75,11 +76,26 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun, onWebSocketCreate }, 
 
   const handleEditorDidMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
+    monacoRef.current = monaco;
+    
+    // Important: Set initial height explicitly to prevent layout shift
+    if (editor && editor.getDomNode()) {
+      const container = editor.getDomNode().parentElement;
+      if (container) {
+        container.style.height = '100%';
+      }
+    }
+    
     editor.onDidFocusEditorWidget(() => {
-      if (isPlaceholderActive) {
-        monacoRef.current = monaco;
-        editor.updateOptions({ language: editorLanguage });
-        console.log("Editor focused, updating language options");
+      // Only handle significant changes if it's the first focus
+      if (isPlaceholderActive || !wasEditorFocused.current) {
+        wasEditorFocused.current = true;
+        
+        // Update language without causing layout shift
+        if (monacoRef.current) {
+          editor.updateOptions({ language: editorLanguage });
+          console.log("Editor focused, updating language options");
+        }
       }
     });
   };
@@ -178,7 +194,10 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun, onWebSocketCreate }, 
           {isLoading ? 'Running...' : 'Run'}
         </button>
       </div>
-      <div className={styles.editorContainer}>
+      <div 
+        className={styles.editorContainer}
+        style={{ height: '100%' }} // Explicitly set height
+      >
         <Editor
           language={editorLanguage}
           value={code}
@@ -190,8 +209,10 @@ const IDE = forwardRef<IDERef, IDEProps>(({ height, onRun, onWebSocketCreate }, 
             lineNumbers: 'on',
             scrollBeyondLastLine: false,
             automaticLayout: true,
+            fixedOverflowWidgets: true, // Prevents widgets from affecting layout
           }}
           onMount={handleEditorDidMount}
+          height="100%" // Explicitly set height to 100%
         />
         {isPlaceholderActive && (
           <div className={styles.placeholderOverlay}>

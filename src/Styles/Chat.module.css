@@ -1,7 +1,7 @@
 .chat {
     display: flex;
     align-items: center;
-    padding: 12px;
+    padding: 12px 8px 0px 8px;
     background-color: #f5f7f9; /* Light background for the chat section */
     border-top: 2px solid #d1d5da; /* Subtle border at the top */
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Shadow for depth */
@@ -15,7 +15,7 @@
 /* Replace .input styles with */
 .input {
     width: 100%;
-    padding: 12px 40px 12px 12px;
+    padding: 12px 12px 0px 12px;
     border: 1px solid #d1d5da;
     border-radius: 25px;
     font-size: 14px;

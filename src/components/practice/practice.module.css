@@ -7,13 +7,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
+  justify-content: flex-start;
+  height: 100%; /* Fixed height */
   max-width: 1200px;
   margin: 0 auto;
   background: linear-gradient(135deg, #f9fff9, #e8f5e9);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  overflow: hidden; /* Hide outer scrollbar */
 }
 
 /* Modern header design */
@@ -111,12 +112,13 @@
 .problemSetsContainer {
   width: 100%;
   padding: 1rem;
-  overflow-y: auto;
+  overflow-y: auto; /* Only this should scroll if needed */
   margin: 0 auto 2rem auto;
   background-color: #f1f8e9;
   border-radius: 8px;
   border: 1px solid #e0e0e0;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  max-height: 400px; /* Limit height and add scroll only when needed */
 }
 
 .problemSetCard {
