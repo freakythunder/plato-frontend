@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: '22.x'
 
-    - name: npm install 
+      - name: npm install 
         run: |
           npm install
          
