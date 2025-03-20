@@ -26,7 +26,7 @@ const CourseGeneration: React.FC = () => {
 
   // Loading messages for the loading screen
   const loadingMessages = [
-    "Compiling your personalized learning roadmap...",
+    "Depending on your chices it may tak 2-10 minutes to generate your course...",
     "Untangling the spaghetti code of knowledge...",
     "Optimizing your learning algorithm...",
     "Brewing the perfect code potion for you...",
@@ -35,7 +35,7 @@ const CourseGeneration: React.FC = () => {
     "Recursively building your knowledge tree...",
     "Initializing your coding journey variables...",
     "Deploying neural networks to craft your perfect course...",
-    "Converting coffee to code curriculum...",
+    "may need to wait for 3 to 7 minutes...",
   ];
 
   // Effect to rotate loading messages
@@ -270,6 +270,8 @@ const CourseGeneration: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Connection': 'keep-alive'
         },
         body: JSON.stringify({ 
           goal, 
@@ -279,11 +281,41 @@ const CourseGeneration: React.FC = () => {
       });
       
       if (!response.ok) throw new Error('Failed to generate course');
+          // Get the response as text first
+    const responseText = await response.text();
+    
+    // Parse the last JSON object in the response
+    // (ignoring the keep-alive JSON packets)
+    let finalData;
+    try {
+      // Split by newlines and find the last non-empty JSON object
+      const jsonChunks = responseText.split('\n\n')
+                            .filter(chunk => chunk.trim() !== '');
       
+      const lastJsonChunk = jsonChunks.reduce((lastValid, current) => {
+        try {
+          const parsed = JSON.parse(current);
+          // Only consider it if it's not a keep-alive packet
+          if (!parsed.keepAlive) {
+            return current;
+          }
+          return lastValid;
+        } catch (e) {
+          return lastValid;
+        }
+      }, jsonChunks[jsonChunks.length - 1]);
+      
+      finalData = JSON.parse(lastJsonChunk);
+    } catch (parseError) {
+      console.error('Error parsing response:', parseError);
+      // Fallback to parsing the entire response
+      finalData = JSON.parse(responseText);
+    }
+    
       // Mark that backend response has been received to complete the progress bar
       setBackendResponseReceived(true);
       
-      const dat = await response.json();
+      const dat = finalData;
       const data = dat.data;
       
       // The courseLanguage we're looking for
