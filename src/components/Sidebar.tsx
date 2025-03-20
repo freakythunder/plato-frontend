@@ -80,11 +80,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isVisible }) => {
         </div>
         <div 
           className={`${styles.sidebarItem} ${isActive('/practice') ? styles.active : ''}`}
-          onClick={handlePracticeClick}
+          
           title="Practice Coding"
         >
           <FontAwesomeIcon icon={faLaptopCode} className={styles.icon} />
           <span className={styles.label}>Practice</span>
+          <span style={{ 
+            fontSize: '0.7rem', 
+            display: 'block', 
+            color: '#999',
+            fontFamily: "'sometype-mono', monospace" 
+          }}>{"Coming Soon"}</span>
         </div>
       </div>
     </div>
