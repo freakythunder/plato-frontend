@@ -120,10 +120,10 @@ const HomePage: React.FC = () => {
             <h1 className={styles.title}>Welcome to Plato</h1>
             <p className={styles.subtitle}>
               We've built a personal tutor to help you learn to code! This is our first
-              prototype, and we'd love your feedback. Book a call with the founders to share your
-              feedback{" "}
+              prototype, and we'd love your feedback.
+              Share your feedback{" "}
               <a
-                href="https://calendly.com/adityaramteke-1357/30min"
+                href="https://forms.gle/1PAjZiSpvLKdMYpb7"
                 target="_blank"
                 rel="noreferrer"
                 className={styles.linkText}
