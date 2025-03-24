@@ -159,8 +159,8 @@ const messageFetchTokenRef = useRef<number>(0);
           setMessages([{
             ...tempLoadingMessage,
             aiResponse: isTheory ?
-              "Theories for this topic are still being crafted. Check back soon!" :
-              "Challenges for this topic are still being prepared. Check back soon!"
+              "AI is preparing a personalized theory for you… Hold on!" :
+              "AI is working hard for you… Hold on!"
           }]);
         }
 
@@ -171,7 +171,7 @@ const messageFetchTokenRef = useRef<number>(0);
           _id: 'error_message',
           user_id: '',
           userMessage: '',
-          aiResponse: "There was an issue loading the content. Please try again later.",
+          aiResponse: "Uh-oh! Please refresh the page to continue learning…",
           timestamp: new Date().toISOString(),
         }]);
       }
@@ -181,7 +181,7 @@ const messageFetchTokenRef = useRef<number>(0);
         _id: 'error_message',
         user_id: '',
         userMessage: '',
-        aiResponse: "Error loading content. Please check your connection and try again.",
+        aiResponse: "Uh-oh! Please refresh the page to continue learning…",
         timestamp: new Date().toISOString(),
       }]);
     } finally {
