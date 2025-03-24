@@ -26,15 +26,11 @@ const CourseGeneration: React.FC = () => {
 
   // Loading messages for the loading screen
   const loadingMessages = [
-    "Depending on your chices it may tak 2-10 minutes to generate your course...",
-    "Untangling the spaghetti code of knowledge...",
-    "Optimizing your learning algorithm...",
-    "Brewing the perfect code potion for you...",
-    "Debugging the path to coding mastery...",
-    "Parsing your expertise level...",
-    "Recursively building your knowledge tree...",
+    "Hold on… I’m creating a course for you…",
     "Initializing your coding journey variables...",
-    "Deploying neural networks to craft your perfect course...",
+    "Depending on your choices it may tak 2-10 minutes to generate your course...",
+    "Recursively building your knowledge tree...",
+    "Rational things make it more understandable",
     "may need to wait for 3 to 7 minutes...",
   ];
 
@@ -511,7 +507,9 @@ const CourseGeneration: React.FC = () => {
         return (
           <div className={styles.welcomeStep}>
             <h1>Hi {username || 'there'}, I'm Plato - Your personal AI-powered coding tutor.</h1>
-            <p>Ready to become an amazing coder? Let me create a lesson plan for you.</p>
+            <p>I can generate a personalised course for you based on your needs.       
+              So… Let’s get started?
+            </p>
             <button className={styles.actionButton} onClick={handleReadyClick}>
               I'm ready 💪
             </button>
@@ -523,8 +521,8 @@ const CourseGeneration: React.FC = () => {
           <div className={styles.goalStep}>
             <h2>What is your goal?</h2>
             <p className={styles.instructionText}>
-              If you're an absolute beginner, start with learning a programming language. 
-              If you are preparing for interviews and know how to code in C++/Java, then choose the second option.
+            If you're a beginner, start with a programming language. If you're prepping for coding interviews and know C++, go with the second option.
+
             </p>
             
             <div className={styles.optionsContainer}>
@@ -532,14 +530,16 @@ const CourseGeneration: React.FC = () => {
                 className={`${styles.optionButton} ${goal === 'language' ? styles.selected : ''}`}
                 onClick={() => handleGoalSelection('language')}
               >
-                Learn a programming language
+                I want to learn a programming language
+
               </button>
               
               <button 
                 className={`${styles.optionButton} ${goal === 'dsa' ? styles.selected : ''}`}
                 onClick={() => handleGoalSelection('dsa')}
               >
-                Learning DSA (using C++)
+                I want to do interview preparation (learn DSA using C++)
+
               </button>
             </div>
             
@@ -552,8 +552,8 @@ const CourseGeneration: React.FC = () => {
           <div className={styles.languageStep}>
             <h2>What language do you want to start your journey with?</h2>
             <p className={styles.instructionText}>
-              Choose C++ or Java if your goal is to learn DSA in the future. 
-              Choose Python or JavaScript if you want to learn how to build applications.
+            If you plan to learn DSA later, choose C++, Java or Python. For building stuff, opt for Python or JavaScript.
+
             </p>
             
             <div className={styles.radioContainer}>
@@ -646,7 +646,8 @@ const CourseGeneration: React.FC = () => {
             <span className={styles.progressBarText}>{progress}% Complete</span>
           </div>
           
-          <h2 className={styles.loadingTitle}>Creating your personalized course</h2>
+          <h2 className={styles.loadingTitle}>Hold on… I’m creating a course for you…
+          </h2>
           <p className={styles.loadingMessage}>{loadingMessage}</p>
         </div>
       </div>
