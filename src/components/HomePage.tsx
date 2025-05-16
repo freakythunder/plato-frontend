@@ -1,13 +1,18 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import styles from "../Styles/HomePage.module.css";
-import { useAuth } from "../context/AuthContext"; // Assuming this manages user session
+import { useAuth } from "../context/AuthContext";
 import googleIcon from "../assets/icons8-google.svg";
-import firebase from 'firebase/compat/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth'; // Updated imports
-import posthog from 'posthog-js'
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth';
+import posthog from 'posthog-js';
+import NavbarWhimsical from "./NavbarWhimsical";
+import HeroSectionWhimsical from "./HeroSectionWhimsical";
+import DemoSectionWhimsical from "./DemoSectionWhimsical";
+import FooterWhimsical from "./FooterWhimsical";
+
 posthog.init('phc_SkoWOGNlQvwgXkAqlKWmYT6l0JStbH2Dpeh5dtY1b2N', { api_host: 'https://us.i.posthog.com' })
+
 // Reusable LoadingScreen Component
 const LoadingScreen: React.FC<{ message: string }> = ({ message }) => (
   <div className={styles.loadingScreen} aria-live="polite">
@@ -40,7 +45,7 @@ const HomePage: React.FC = () => {
       const result = await signInWithPopup(auth, provider);
 
       const credential = GoogleAuthProvider.credentialFromResult(result);
-      let idToken ;
+      let idToken;
       const user = result.user;
       // Check if user signed in successfully
       console.log("User signed in successfully:", result.user);
@@ -65,14 +70,9 @@ const HomePage: React.FC = () => {
        idToken = await idTokenPromise;
       }
 
-      
-
-
-
       // Send user data (including ID token) to backend for verification
       const response = await api.post("/auth/login", {
          idToken, // Use ID token for verification
-       
       });
 
       if (response.data?.success) {
@@ -102,52 +102,22 @@ const HomePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  return (
-    <main className={styles.homePage}>
+  };  return (
+    <div className={styles.whimsicalContainer}>
       {loading ? (
         <LoadingScreen message={loadingText} />
       ) : (
         <>
-          {/* Header */}
-          <header className={styles.header}>
-            <div className={styles.logo}>plato</div>
-          </header>
-
-          {/* Main Content */}
-          <div className={styles.content}>
-            <h1 className={styles.title}>Welcome to Plato</h1>
-            <p className={styles.subtitle}>
-              We've built a personal tutor to help you learn to code! This is our first
-              prototype, and we'd love your feedback.
-              Share your feedback{" "}
-              <a
-                href="https://forms.gle/1PAjZiSpvLKdMYpb7"
-                target="_blank"
-                rel="noreferrer"
-                className={styles.linkText}
-              >
-                here
-              </a>
-              .
-            </p>
-
-            <button className={styles.tryButton} onClick={handleGoogleLogin}>
-              <img src={googleIcon} alt="Google Icon" className={styles.googleIcon} />
-              Signup or Login
-
-              <div id="firebaseui-auth-container"
-              ></div>
-
-            </button>
-          </div>
+          <NavbarWhimsical onLogin={handleGoogleLogin} />
+          <main className={styles.mainContent}>
+            <HeroSectionWhimsical onLogin={handleGoogleLogin} />
+            <DemoSectionWhimsical onLogin={handleGoogleLogin} />
+          </main>
+          <FooterWhimsical />
+          {errorMessage && <div className={styles.error}>{errorMessage}</div>}
         </>
       )}
-
-      {/* Error Message */}
-      {errorMessage && <div className={styles.error}>{errorMessage}</div>}
-    </main>
+    </div>
   );
 };
 

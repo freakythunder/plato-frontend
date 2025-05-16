@@ -1,6 +1,7 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { auth } from '../services/firebase';
+import { setTokenWithTimestamp, isLocalTokenValid } from '../utils/tokenUtils';
 interface AuthContextType {
   username: string | null;
   setUsername: (username: string | null) => void;
@@ -17,34 +18,41 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [username, setUsername] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
   const [shouldClearCode, setShouldClearCode] = useState<boolean>(false); // Initialize the new variable
   const [currentUser, setCurrentUser] = useState(null);
-  const [imageurl, setImageurl] = useState<string | null>(null);
-  useEffect(() => {
+  const [imageurl, setImageurl] = useState<string | null>(null);  useEffect(() => {
     auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
       if (user) {
         user.getIdToken().then((token) => {
-          localStorage.setItem('token', token);
+          setTokenWithTimestamp(token); // Use utility function to store token with timestamp
           setImageurl(user.photoURL);
+          setIsAuthenticated(true);
           console.log("user from authcontext : ", user);
         });
       } else {
         localStorage.removeItem('token');
+        localStorage.removeItem('tokenTimestamp');
+        setIsAuthenticated(false);
       }
     });
   }, []);
-  
-
-   const login = (username: string, token: string, message: string) => {
-    
+     const login = (username: string, token: string, message: string) => {
     
     localStorage.setItem('username', username);
-    localStorage.setItem('token', token);
+    setTokenWithTimestamp(token); // Use utility function to store token with timestamp
     
     const trimmedMessage = message.trim().toLowerCase();
    
@@ -75,18 +83,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearWelcomeMessage = () => {
     localStorage.removeItem('welcomeMessage');
     setWelcomeMessage(null);
-  };
-
-  
-  useEffect(() => {
+  };    useEffect(() => {
     const storedUsername = localStorage.getItem('username');
     const token = localStorage.getItem('token');
     const storedTopics = localStorage.getItem('topics');
     
-
-    if (storedUsername && token) {
+    // Check if token is valid (not expired)
+    if (storedUsername && token && isLocalTokenValid()) {
       setUsername(storedUsername);
       setIsAuthenticated(true);
+    } else {
+      // Clear invalid authentication data
+      if (token && !isLocalTokenValid()) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('tokenTimestamp');
+        localStorage.removeItem('username');
+      }
+      
+      // Ensure authentication state is consistent with localStorage
+      setIsAuthenticated(false);
+      setUsername(null);
     }
   }, []);
 
@@ -107,12 +123,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

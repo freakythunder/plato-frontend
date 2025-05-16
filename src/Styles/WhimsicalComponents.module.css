@@ -1,0 +1,383 @@
+/* WhimsicalComponents.module.css */
+/* Navbar Styles */
+.navbar {
+  background-color: #f3f4f6;
+  padding: 0.75rem 1.5rem;
+}
+
+.navbarContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbarLogo {
+  display: flex;
+  align-items: center;
+}
+
+.navbarLogoText {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #34A853;
+  font-family: 'Sometype Mono', monospace;
+}
+
+.navbarButtons {
+  display: flex;
+  gap: 1rem;
+}
+
+.navbarLoginButton {
+  border: 1px solid #34A853;
+  color: #34A853;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Sometype Mono', monospace;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbarLoginButton:hover {
+  background-color: #34A853;
+  color: white;
+}
+
+.navbarSignupButton {
+  background-color: #34A853;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  font-family: 'Sometype Mono', monospace;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbarSignupButton:hover {
+  background-color: #2d9346;
+}
+
+/* Hero Section Styles */
+.heroSection {
+  padding: 2rem 1rem;
+  min-height: auto;
+  max-height: none;
+}
+
+.heroContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  background-color: white;
+}
+
+@media (min-width: 768px) {
+  .heroContent {
+    flex-direction: row;
+  }
+}
+
+.heroTextContent {
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .heroTextContent {
+    width: 50%;
+    margin-bottom: 0;
+    padding-right: 3rem;
+  }
+}
+
+.heroTitle {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .heroTitle {
+    font-size: 3rem;
+  }
+}
+
+.heroDescription {
+  font-size: 1.125rem;
+  color: #4b5563;
+  margin-bottom: 2rem;
+  line-height: 1.625;
+}
+
+.heroButton {
+  background-color: #34A853;
+  color: white;
+  padding: 1rem 1.5rem;
+  font-size: 1.125rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  font-family: 'Sometype Mono', monospace;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.heroButton:hover {
+  background-color: #2d9346;
+}
+
+.heroImageContainer {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .heroImageContainer {
+    width: 50%;
+  }
+}
+
+.heroImage {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.heroImageContent {
+  width: 100%;
+  height: auto;
+}
+
+.googleIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.heroButton .googleIcon,
+.demoButton .googleIcon,
+.navbarSignupButton .googleIcon {
+  filter: brightness(0) invert(1);
+}
+
+.navbarLoginButton .googleIcon {
+  filter: none;
+}
+
+/* Demo Section Styles */
+.demoSection {
+  padding: 3rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: block;
+  width: 100%;
+  position: relative;
+}
+
+.demoTitle {
+  font-size: 2.25rem;
+  font-weight: 700;
+  text-align: center;
+  color: #1f2937;
+  margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+  .demoTitle {
+    font-size: 2.5rem;
+  }
+}
+
+.demoVideoContainer {
+  max-width: 768px;
+  margin: 0 auto 3rem auto;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.demoVideo {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+}
+
+.demoVideoFrame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.demoButtonContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.demoButton {
+  background-color: #34A853;
+  color: white;
+  padding: 1rem 1.5rem;
+  font-size: 1.125rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  font-family: 'Sometype Mono', monospace;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.demoButton:hover {
+  background-color: #2d9346;
+}
+
+/* Footer Styles */
+.footer {
+  background-color: #1f2937;
+  color: white;
+  padding: 2rem 1rem;
+  width: 100%;
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+}
+
+.footerContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footerContent {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .footerContent {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.footerInfo {
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .footerInfo {
+    margin-bottom: 0;
+  }
+}
+
+.footerLogo {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.footerDescription {
+  color: #9ca3af;
+  max-width: 20rem;
+}
+
+.footerLinksContainer {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .footerLinksContainer {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.footerLinkGroup {
+  margin-bottom: 1rem;
+}
+
+.footerLinkHeader {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.footerLinkList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footerLink {
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footerLink:hover {
+  color: white;
+}
+
+.footerBottom {
+  border-top: 1px solid #374151;
+  padding-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .footerBottom {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.footerCopyright {
+  color: #9ca3af;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .footerCopyright {
+    margin-bottom: 0;
+  }
+}
+
+.footerSocial {
+  display: flex;
+  gap: 1rem;
+}
+
+.footerSocialLink {
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.footerSocialLink:hover {
+  color: white;
+}
+
+.footerSocialIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}

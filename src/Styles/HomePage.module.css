@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Sometype+Mono:wght@400;500;600;700&display=swap");
 
 /* Global Styles */
 * {
@@ -8,9 +9,56 @@
 }
 
 body {
-  font-family:"sometype mono";
+  font-family: "Sometype Mono", monospace;
 }
 
+.whimsicalContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f9fafb;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding-bottom: 0;
+}
+
+.mainContent {
+  flex: 1 0 auto;
+  width: 100%;
+  display: block;
+}
+
+/* Loading Screen */
+.loadingScreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f9fafb;
+}
+
+.loadingScreen h2 {
+  color: #34A853;
+  font-family: "Sometype Mono", monospace;
+}
+
+/* Error Message */
+.error {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ef4444;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+/* Original HomePage Styles - Kept for reference */
 .homePage {
   background: rgb(198 219 188);
   color: #fff;
@@ -35,7 +83,6 @@ body {
   font-weight: bold;
   color: #0b0909;
   font-family:"sometype mono";
-
 }
 
 .loginButton {
@@ -91,11 +138,13 @@ body {
   font-size: 16px;
   transition: background-color 0.3s, transform 0.3s; /* Smooth transition for hover effects */
 }
+
 .googleIcon {
   width: 20px; /* Set the width of the Google icon */
   height: 20px; /* Set the height of the Google icon */
   margin-right: 8px; /* Space between icon and text */
 }
+
 .tryButton:hover {
   background-color: #f0f0f0; /* Light gray on hover */
   transform: scale(1.05); /* Slightly enlarge button on hover */
@@ -164,4 +213,23 @@ body {
    /* or any other color you want */
   text-decoration: underline;
   font-weight: bold;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+  .whimsicalContainer {
+    min-height: auto;
+    overflow-y: visible;
+  }
+
+  .mainContent {
+    display: block;
+  }
+}
+
+/* Additional tweaks for very small screens */
+@media (max-width: 480px) {
+  .whimsicalContainer {
+    height: auto;
+  }
 }

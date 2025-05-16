@@ -7,8 +7,39 @@ import posthog from 'posthog-js';
 
 const CourseGeneration: React.FC = () => {
   const navigate = useNavigate();
-  const { username } = useAuth();
+  const { username, isAuthenticated } = useAuth();
   const { setAllTopics } = useProgress();
+    // Additional authentication check
+  useEffect(() => {
+    // We need to import the utility here
+    const isLocalTokenValid = () => {
+      const token = localStorage.getItem('token');
+      const tokenTimestamp = localStorage.getItem('tokenTimestamp');
+      
+      if (!token || !tokenTimestamp) {
+        return false;
+      }
+      
+      const now = Date.now();
+      const timestamp = parseInt(tokenTimestamp, 10);
+      const ONE_HOUR = 60 * 60 * 1000; // 1 hour in milliseconds
+      
+      // If token is older than 1 hour, consider it expired
+      return now - timestamp < ONE_HOUR;
+    };
+
+    const token = localStorage.getItem('token');
+    if (!isAuthenticated || !token || !isLocalTokenValid()) {
+      console.log("Unauthorized access attempt to course_generation page");
+      // Clear any potentially invalid authentication data
+      localStorage.removeItem('token');
+      localStorage.removeItem('tokenTimestamp');
+      localStorage.removeItem('username');
+      navigate('/');
+      return;
+    }
+  }, [isAuthenticated, navigate]);
+  
   const [currentStep, setCurrentStep] = useState(1);
   const [goal, setGoal] = useState('');
   const [language, setLanguage] = useState('');
